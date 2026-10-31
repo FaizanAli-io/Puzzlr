@@ -1,4 +1,5 @@
 import type {
+  Coord,
   GridCell,
   GridCellMatrix,
   GridCellState,
@@ -7,26 +8,31 @@ import type {
 
 export function initializeGameState(grid: GridCellMatrix): GridCellStateMatrix {
   return grid.map((row) =>
-    row.map((cell) => ({ region: cell, isClicked: false })),
+    row.map((cell) => ({
+      region: cell,
+      isClicked: false,
+      highlight: false,
+    })),
   )
 }
 
-export function printGameState(grid: GridCellStateMatrix): string {
-  const solutions = grid
-    .flatMap((row, i) => row.map((cell, j) => cell.isClicked && [i, j]))
-    .filter((x) => x)
-
-  return JSON.stringify(solutions, null, 2)
+export function printGameState(grid: GridCellStateMatrix) {
+  return JSON.stringify(
+    grid
+      .flatMap((row, i) => row.map((cell, j) => cell.isClicked && [i, j]))
+      .filter((x) => x),
+    null,
+    2,
+  )
 }
 
 export function resetGameState(grid: GridCellStateMatrix): GridCellStateMatrix {
-  return grid.map((row) => row.map((cell) => ({ ...cell, isClicked: false })))
+  return grid.map((row) =>
+    row.map((cell) => ({ ...cell, isClicked: false, highlight: false })),
+  )
 }
 
-export function checkGameState(grid: GridCellStateMatrix): {
-  isValid: boolean
-  message: string
-} {
+export function checkGameState(grid: GridCellStateMatrix) {
   const gridSize = grid.length
 
   if (!gridSize || !grid.every((row) => row.length === gridSize))
@@ -91,4 +97,13 @@ export function checkGameState(grid: GridCellStateMatrix): {
         .join('\n')
 
   return { isValid, message }
+}
+
+export function highlightCells(grid: GridCellStateMatrix, solution: Coord[]) {
+  const newGrid = structuredClone(grid)
+  for (const [i, j] of solution) {
+    newGrid[i][j].highlight = true
+  }
+
+  return newGrid
 }

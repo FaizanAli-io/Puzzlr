@@ -2,6 +2,8 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import { COLOR_MAP } from './constants'
 
+export type Coord = [number, number]
+
 export type GameListItem = {
   index: number
   name: string
@@ -13,6 +15,7 @@ export type GridCell = keyof typeof COLOR_MAP
 export type GridCellState = {
   region: GridCell
   isClicked: boolean
+  highlight: boolean
 }
 
 export type GridCellMatrix = GridCell[][]
@@ -37,8 +40,4 @@ export type GameGridProps = {
   setGrid: Dispatch<SetStateAction<GridCellStateMatrix>>
 }
 
-export type GameOptionsProps = {
-  resetGameState: () => void
-  printGameState: () => string
-  checkGameState: () => { isValid: boolean; message: string }
-}
+export type GameOptionsProps = GameGridProps

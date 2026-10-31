@@ -2,6 +2,15 @@ import { useState } from 'react'
 
 import type { GameOptionsProps } from '../types'
 
+import {
+  checkGameState,
+  highlightCells,
+  printGameState,
+  resetGameState,
+} from '../utils/gameState'
+
+import { GameSolver } from '../utils/gameSolver'
+
 const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
   const borderColorClass =
     valid === undefined
@@ -19,25 +28,38 @@ const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
   )
 }
 
-export const GameOptions = ({
-  resetGameState,
-  printGameState,
-  checkGameState,
-}: GameOptionsProps) => {
-  const [text, setText] = useState('')
+export const GameOptions = ({ grid, setGrid }: GameOptionsProps) => {
   const [valid, setValid] = useState<boolean | undefined>(undefined)
+  const [text, setText] = useState('')
 
-  const handlePrint = () => setText(printGameState())
+  const handleReset = () => {
+    setGrid((prev) => resetGameState(prev))
+    handleClear()
+  }
+
+  const handlePrint = () => setText(printGameState(grid))
 
   const handleCheck = () => {
-    const { isValid, message } = checkGameState()
-    setText(message)
+    const { isValid, message } = checkGameState(grid)
     setValid(isValid)
+    setText(message)
+  }
+
+  const handleSolve = () => {
+    const { result, solution } = new GameSolver(grid).solve()
+    setValid(result)
+    setText(
+      result
+        ? 'A solution was found for this game'
+        : 'No solution possible for this game',
+    )
+
+    setGrid((prev) => highlightCells(prev, solution))
   }
 
   const handleClear = () => {
-    setText('')
     setValid(undefined)
+    setText('')
   }
 
   const buttonClasses = 'border rounded-md p-2'
@@ -45,7 +67,7 @@ export const GameOptions = ({
   return (
     <>
       <div className="flex justify-between">
-        <button className={buttonClasses} onClick={resetGameState}>
+        <button className={buttonClasses} onClick={handleReset}>
           Reset
         </button>
 
@@ -57,11 +79,18 @@ export const GameOptions = ({
           Check
         </button>
 
-        <button className={buttonClasses} onClick={handleClear}>
-          Clear
+        <button className={buttonClasses} onClick={handleSolve}>
+          Solve
         </button>
       </div>
-      {text && <TextBox text={text} valid={valid} />}
+      {text && (
+        <>
+          <TextBox text={text} valid={valid} />
+          <button className={buttonClasses} onClick={handleClear}>
+            Clear
+          </button>
+        </>
+      )}
     </>
   )
 }

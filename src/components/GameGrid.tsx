@@ -3,12 +3,14 @@ import { COLOR_MAP } from '../constants'
 import type { GameGridProps, GridCellProps } from '../types'
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
+  const borderClass = cell.highlight ? 'border-4' : ''
+
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.region] }}
-      className="flex aspect-square items-center justify-center rounded-sm"
+      className={`flex aspect-square items-center justify-center rounded-sm ${borderClass}`}
     >
       {cell.isClicked ? 'X' : ''}
     </button>
