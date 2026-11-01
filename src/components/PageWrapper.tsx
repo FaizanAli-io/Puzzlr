@@ -11,20 +11,32 @@ import { initializeGameState } from '../utils/gameState'
 export const PageWrapper = () => {
   const [selectedGame, setSelectedGame] = useState(0)
 
-  const [grid, setGrid] = useState(() =>
-    initializeGameState(getGame(selectedGame).regions),
-  )
+  const current = getGame(selectedGame)
+
+  const [gridSize, setGridSize] = useState(() => current.size)
+
+  const [grid, setGrid] = useState(() => initializeGameState(current.regions))
 
   const changeGame = (index: number) => {
+    const current = getGame(index)
+
+    console.log(current)
+
     setSelectedGame(index)
-    setGrid(initializeGameState(getGame(index).regions))
+    setGridSize(current.size)
+    setGrid(initializeGameState(current.regions))
   }
 
   return (
-    <main className="mx-auto flex w-full max-w-md flex-col items-stretch gap-8 pb-4">
+    <main className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-8 pb-4">
       <Header />
       <GameSelector selectedGame={selectedGame} onChange={changeGame} />
-      <GameGrid key={selectedGame} grid={grid} setGrid={setGrid} />
+      <GameGrid
+        key={selectedGame}
+        grid={grid}
+        setGrid={setGrid}
+        gridSize={gridSize}
+      />
       <GameOptions grid={grid} setGrid={setGrid} />
     </main>
   )

@@ -2,14 +2,10 @@ import games from '../games.json'
 
 import type { Game, GameListItem } from '../types'
 
-export function getGameList(): GameListItem[] {
-  return games.map((game, gameIndex) => ({
-    index: gameIndex,
-    name: game.name,
-    size: game.size,
-  }))
+export function getGame(index: number): Game {
+  return games[index] as Game
 }
 
-export function getGame(gameIndex: number): Game {
-  return games[gameIndex] as Game
+export function getGameList(): GameListItem[] {
+  return games as GameListItem[]
 }

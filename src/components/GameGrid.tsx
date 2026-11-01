@@ -17,7 +17,7 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
   )
 }
 
-export const GameGrid = ({ grid, setGrid }: GameGridProps) => {
+export const GameGrid = ({ grid, setGrid, gridSize }: GameGridProps) => {
   const cellClicked = (i: number, j: number) => {
     setGrid((prev) =>
       prev.map((row, r) =>
@@ -29,13 +29,16 @@ export const GameGrid = ({ grid, setGrid }: GameGridProps) => {
   }
 
   return (
-    <div className="grid grid-cols-8 gap-2">
+    <div
+      className="grid gap-2"
+      style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
+    >
       {grid.map((row, i) =>
         row.map((cell, j) => (
           <GridCell
+            key={`${i}-${j}`}
             cell={cell}
             onClick={() => cellClicked(i, j)}
-            key={`${i}-${j}`}
           />
         )),
       )}

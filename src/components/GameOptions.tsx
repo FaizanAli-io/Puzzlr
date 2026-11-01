@@ -46,12 +46,14 @@ export const GameOptions = ({ grid, setGrid }: GameOptionsProps) => {
   }
 
   const handleSolve = () => {
-    const { result, solution } = new GameSolver(grid).solve()
+    const { result, solution, metadata } = new GameSolver(grid).solve()
+    const statistics = `${metadata.duration} ms / ${metadata.recursions} calls`
+
     setValid(result)
     setText(
       result
-        ? 'A solution was found for this game'
-        : 'No solution possible for this game',
+        ? `A solution was found for this game (${statistics})`
+        : `No solution possible for this game (${statistics})`,
     )
 
     setGrid((prev) => highlightCells(prev, solution))

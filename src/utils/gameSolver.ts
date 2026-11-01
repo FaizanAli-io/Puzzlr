@@ -5,16 +5,23 @@ type RegionMap = Record<GridCell, boolean>
 
 export class GameSolver {
   gridSize: number
-  solution: Coord[]
   matrix: GridCell[][]
+
+  solution: Coord[]
+  recursions: number
 
   constructor(grid: GridCellStateMatrix) {
     this.solution = []
+    this.recursions = 0
+
     this.gridSize = grid.length
     this.matrix = grid.map((row) => row.map((cell) => cell.region))
   }
 
   solve() {
+    this.solution = []
+    this.recursions = 0
+
     const moves = Array.from({ length: this.gridSize }, () =>
       Array.from({ length: this.gridSize }, (_, i) => i),
     )
@@ -23,9 +30,17 @@ export class GameSolver {
       Object.keys(COLOR_MAP).map((key) => [key, true]),
     ) as RegionMap
 
+    const start = performance.now()
+
     const result = this.solveRecursive(0, moves, regions)
 
-    return { result, solution: this.solution }
+    const duration = Math.round(performance.now() - start)
+
+    return {
+      result,
+      solution: this.solution,
+      metadata: { duration, recursions: this.recursions },
+    }
   }
 
   private solveRecursive(
@@ -35,6 +50,8 @@ export class GameSolver {
   ) {
     if (rowIndex >= this.gridSize) return true
     if (moves[rowIndex].length === 0) return false
+
+    this.recursions++
 
     for (const move of moves[rowIndex]) {
       const { newMoves, newRegions } = this.reduceMoves(

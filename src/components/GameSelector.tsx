@@ -12,8 +12,8 @@ export const GameSelector = ({ selectedGame, onChange }: GameSelectorProps) => (
     onChange={(e) => onChange(Number(e.target.value))}
   >
     {getGameList().map((game) => (
-      <option key={game.index} value={game.index}>
-        {game.name} ({game.size})
+      <option key={game.id} value={game.id}>
+        Game {game.id + 1} ({game.size})
       </option>
     ))}
   </select>
