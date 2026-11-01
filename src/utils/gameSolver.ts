@@ -9,10 +9,12 @@ export class GameSolver {
 
   solution: Coord[]
   recursions: number
+  backtracks: number
 
   constructor(grid: GridCellStateMatrix) {
     this.solution = []
     this.recursions = 0
+    this.backtracks = 0
 
     this.gridSize = grid.length
     this.matrix = grid.map((row) => row.map((cell) => cell.region))
@@ -21,6 +23,7 @@ export class GameSolver {
   solve() {
     this.solution = []
     this.recursions = 0
+    this.backtracks = 0
 
     const moves = Array.from({ length: this.gridSize }, () =>
       Array.from({ length: this.gridSize }, (_, i) => i),
@@ -39,7 +42,11 @@ export class GameSolver {
     return {
       result,
       solution: this.solution,
-      metadata: { duration, recursions: this.recursions },
+      metadata: {
+        duration,
+        recursions: this.recursions,
+        backtracks: this.backtracks,
+      },
     }
   }
 
@@ -49,7 +56,6 @@ export class GameSolver {
     regions: RegionMap,
   ) {
     if (rowIndex >= this.gridSize) return true
-    if (moves[rowIndex].length === 0) return false
 
     this.recursions++
 
@@ -65,6 +71,8 @@ export class GameSolver {
         return true
       }
     }
+
+    this.backtracks++
 
     return false
   }

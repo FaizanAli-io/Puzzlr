@@ -47,7 +47,9 @@ export const GameOptions = ({ grid, setGrid }: GameOptionsProps) => {
 
   const handleSolve = () => {
     const { result, solution, metadata } = new GameSolver(grid).solve()
-    const statistics = `${metadata.duration} ms / ${metadata.recursions} calls`
+
+    const { duration, recursions, backtracks } = metadata
+    const statistics = `${duration} ms / ${recursions} recursions / ${backtracks} backtracks`
 
     setValid(result)
     setText(
