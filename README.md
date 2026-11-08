@@ -1,73 +1,98 @@
-# React + TypeScript + Vite
+# 🧩 Puzzlr
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+**Play. Think. Solve.**
 
-Currently, two official plugins are available:
+Puzzlr is a collection of interactive logic puzzles, built from scratch with React and TypeScript. Each puzzle comes with its own gameplay, validation, and algorithmic solver.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+A personal project exploring problem-solving, recursion, backtracking, and the algorithms behind logic puzzles.
 
-## React Compiler
+## 🎮 Games
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+| Puzzle          | Status      | Features                                                     |
+| --------------- | ----------- | ------------------------------------------------------------ |
+| 👑 Queens       | ✅ Playable | Interactive board, validation, recursive backtracking solver |
+| 🔢 Sudoku       | 🚧 Planned  | Interactive Sudoku game and solver                           |
+| 🧩 More puzzles | 💡 Future   | More logic challenges to come                                |
 
-## Expanding the ESLint configuration
+### 👑 Queens
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+Place exactly one queen in each row, column, and colored region. Queens cannot touch one another, even diagonally.
 
-```js
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
+**Features**
 
-      // Remove tseslint.configs.recommended and replace with this
-      tseslint.configs.recommendedTypeChecked,
-      // Alternatively, use this for stricter rules
-      tseslint.configs.strictTypeChecked,
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
+- Multiple board sizes, including 8×8 through 12×12
+- Interactive, color-coded puzzle boards
+- Solution validation with descriptive feedback
+- Automatic solver using recursive backtracking
+- Solution highlighting
+- Reset and board inspection controls
 
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+## 🛠️ Tech Stack
+
+- **React** — Component-based UI
+- **TypeScript** — Type-safe application logic
+- **Vite** — Development and build tooling
+- **Tailwind CSS** — Styling
+
+The puzzle solvers are implemented from scratch, without external solving libraries.
+
+## 🚀 Getting Started
+
+**Prerequisites:** Node.js and npm.
+
+Clone the repository:
+
+```bash
+git clone https://github.com/FaizanAli-io/Puzzlr.git
+cd Puzzlr
 ```
 
-You can also install [eslint-plugin-react-x](https://npmx.dev/package/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://npmx.dev/package/eslint-plugin-react-dom) for React-specific lint rules:
+Install dependencies:
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
+```bash
+npm install
 ```
+
+Start the development server:
+
+```bash
+npm run dev
+```
+
+Open the local URL displayed in your terminal.
+
+To create a production build:
+
+```bash
+npm run build
+```
+
+## 🧠 Project Goals
+
+Puzzlr is as much a learning project as it is a puzzle collection.
+
+The goals are to:
+
+- Explore different approaches to constraint-satisfaction problems.
+- Design and implement puzzle-solving algorithms independently.
+- Experiment with recursion, backtracking, and search optimizations.
+- Build clean, reusable React components.
+- Improve TypeScript and software engineering skills.
+
+## 🗺️ Roadmap
+
+- [x] Build an interactive Queens game
+- [x] Implement Queens solution validation
+- [x] Build a recursive backtracking solver
+- [x] Support multiple puzzle sizes
+- [ ] Add Sudoku
+- [ ] Implement a Sudoku solver
+- [ ] Explore additional logic puzzles
+
+## 👨‍💻 Author
+
+Built with curiosity (and a healthy amount of debugging) by **Faizan Ali**.
+
+---
+
+_Every puzzle is a problem waiting to be solved._
