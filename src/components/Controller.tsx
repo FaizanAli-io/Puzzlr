@@ -1,15 +1,6 @@
+import type { GameControllerProps } from '@/types'
+
 import { useState } from 'react'
-
-import type { GameOptionsProps } from '../types'
-
-import {
-  checkGameState,
-  highlightCells,
-  printGameState,
-  resetGameState,
-} from '../utils/gameState'
-
-import { GameSolver } from '../utils/gameSolver'
 
 const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
   const borderColorClass =
@@ -28,37 +19,34 @@ const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
   )
 }
 
-export const GameOptions = ({ grid, setGrid }: GameOptionsProps) => {
+export const Controller = <T,>({
+  grid,
+  setGrid,
+  gameUtils,
+}: GameControllerProps<T>) => {
   const [valid, setValid] = useState<boolean | undefined>(undefined)
   const [text, setText] = useState('')
 
   const handleReset = () => {
-    setGrid((prev) => resetGameState(prev))
+    setGrid((prev) => gameUtils.resetGame(prev))
     handleClear()
   }
 
-  const handlePrint = () => setText(printGameState(grid))
+  const handlePrint = () => setText(gameUtils.printGame(grid))
 
   const handleCheck = () => {
-    const { isValid, message } = checkGameState(grid)
+    const { isValid, message } = gameUtils.checkGame(grid)
+
     setValid(isValid)
     setText(message)
   }
 
   const handleSolve = () => {
-    const { result, solution, metadata } = new GameSolver(grid).solve()
+    const { isValid, message, newGrid } = gameUtils.solveGame(grid)
 
-    const { duration, recursions, backtracks } = metadata
-    const statistics = `${duration} ms / ${recursions} recursions / ${backtracks} backtracks`
-
-    setValid(result)
-    setText(
-      result
-        ? `A solution was found for this game (${statistics})`
-        : `No solution possible for this game (${statistics})`,
-    )
-
-    setGrid((prev) => highlightCells(prev, solution))
+    setValid(isValid)
+    setText(message)
+    setGrid(newGrid)
   }
 
   const handleClear = () => {

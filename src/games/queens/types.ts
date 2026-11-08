@@ -4,36 +4,25 @@ import { COLOR_MAP } from './constants'
 
 export type Coord = [number, number]
 
-export type GridCell = keyof typeof COLOR_MAP
-
-export type GridCellMatrix = GridCell[][]
-
-export type GameListItem = {
-  id: number
-  size: number
-}
+export type Cell = keyof typeof COLOR_MAP
 
 export type Game = {
   id: number
   size: number
-  regions: GridCellMatrix
+  regions: Cell[][]
 }
 
-export type GridCellState = {
-  region: GridCell
+export type CellState = {
+  region: Cell
   isClicked: boolean
   highlight: boolean
 }
 
-export type GridCellStateMatrix = GridCellState[][]
-
 export type GridCellProps = {
-  cell: GridCellState
+  cell: CellState
   onClick: () => void
 }
 
-export type GameGridProps = StateProps<GridCellStateMatrix, 'grid'> & {
+export type GridProps = StateProps<CellState[][], 'grid'> & {
   gridSize: number
 }
-
-export type GameOptionsProps = StateProps<GridCellStateMatrix, 'grid'>

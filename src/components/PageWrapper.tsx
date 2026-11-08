@@ -18,10 +18,10 @@ export const PageWrapper = () => {
 
   const BackButton = (
     <button
-      className="m-2 rounded-sm border px-2 hover:ring-1"
+      className="fixed top-4 left-4 rounded-sm border px-2 py-1 hover:ring-1"
       onClick={() => setSelectedGame(undefined)}
     >
-      Go Back
+      Back
     </button>
   )
 

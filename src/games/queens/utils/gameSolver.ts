@@ -1,17 +1,17 @@
 import { COLOR_MAP } from '../constants'
-import type { Coord, GridCell, GridCellStateMatrix } from '../types'
+import type { Cell, CellState, Coord } from '../types'
 
-type RegionMap = Record<GridCell, boolean>
+type RegionMap = Record<Cell, boolean>
 
 export class GameSolver {
   gridSize: number
-  matrix: GridCell[][]
+  matrix: Cell[][]
 
   solution: Coord[]
   recursions: number
   backtracks: number
 
-  constructor(grid: GridCellStateMatrix) {
+  constructor(grid: CellState[][]) {
     this.solution = []
     this.recursions = 0
     this.backtracks = 0

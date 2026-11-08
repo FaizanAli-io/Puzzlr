@@ -1,22 +1,19 @@
-import type {
-  Coord,
-  GridCell,
-  GridCellMatrix,
-  GridCellState,
-  GridCellStateMatrix,
-} from '../types'
+import type { Cell, CellState, Coord } from '../types'
 
-export function initializeGameState(grid: GridCellMatrix): GridCellStateMatrix {
+import { checkAndReturnGameSize } from '@/utils/helper'
+import { GameSolver } from '../utils/gameSolver'
+
+export function resetGame(grid: Cell[][] | CellState[][]): CellState[][] {
   return grid.map((row) =>
     row.map((cell) => ({
-      region: cell,
+      region: typeof cell === 'string' ? cell : cell.region,
       isClicked: false,
       highlight: false,
     })),
   )
 }
 
-export function printGameState(grid: GridCellStateMatrix) {
+export function printGame(grid: CellState[][]) {
   return JSON.stringify(
     grid
       .flatMap((row, i) => row.map((cell, j) => cell.isClicked && [i, j]))
@@ -26,19 +23,10 @@ export function printGameState(grid: GridCellStateMatrix) {
   )
 }
 
-export function resetGameState(grid: GridCellStateMatrix): GridCellStateMatrix {
-  return grid.map((row) =>
-    row.map((cell) => ({ ...cell, isClicked: false, highlight: false })),
-  )
-}
+export function checkGame(grid: CellState[][]) {
+  const gridSize = checkAndReturnGameSize(grid)
 
-export function checkGameState(grid: GridCellStateMatrix) {
-  const gridSize = grid.length
-
-  if (!gridSize || !grid.every((row) => row.length === gridSize))
-    return { isValid: false, message: 'Grid Dimensions are invalid.' }
-
-  const clickedToNum = (cell: GridCellState) => Number(cell.isClicked)
+  const clickedToNum = (cell: CellState) => Number(cell.isClicked)
 
   type Coord = [number, number]
 
@@ -53,7 +41,7 @@ export function checkGameState(grid: GridCellStateMatrix) {
     ).filter(([r, c]) => r >= 0 && c >= 0 && r < gridSize && c < gridSize)
   }
 
-  const regions: Partial<Record<GridCell, number>> = {}
+  const regions: Partial<Record<Cell, number>> = {}
 
   grid.forEach((row) =>
     row.forEach((cell) => {
@@ -99,7 +87,22 @@ export function checkGameState(grid: GridCellStateMatrix) {
   return { isValid, message }
 }
 
-export function highlightCells(grid: GridCellStateMatrix, solution: Coord[]) {
+export function solveGame(grid: CellState[][]) {
+  const { result, solution, metadata } = new GameSolver(grid).solve()
+
+  const { duration, recursions, backtracks } = metadata
+  const statistics = `for this game in ${duration} ms with ${recursions} recursions and ${backtracks} backtracks`
+
+  return {
+    isValid: result,
+    message: result
+      ? `A solution was found ${statistics}`
+      : `No solution possible ${statistics}`,
+    newGrid: highlightCells(grid, solution),
+  }
+}
+
+function highlightCells(grid: CellState[][], solution: Coord[]) {
   const newGrid = structuredClone(grid)
   for (const [i, j] of solution) {
     newGrid[i][j].highlight = true

@@ -1,6 +1,6 @@
 import { COLOR_MAP } from '../constants'
 
-import type { GameGridProps, GridCellProps } from '../types'
+import type { GridCellProps, GridProps } from '../types'
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
   const borderClass = cell.highlight ? 'border-4' : ''
@@ -10,19 +10,19 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.region] }}
-      className={`flex aspect-square items-center justify-center rounded-sm ${borderClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${borderClass}`}
     >
       {cell.isClicked ? 'X' : ''}
     </button>
   )
 }
 
-export const GameGrid = ({ grid, setGrid, gridSize }: GameGridProps) => {
+export const Grid = ({ grid, setGrid, gridSize }: GridProps) => {
   const cellClicked = (i: number, j: number) => {
     setGrid((prev) =>
       prev.map((row, r) =>
-        row.map((item, c) =>
-          r === i && c === j ? { ...item, isClicked: !item.isClicked } : item,
+        row.map((cell, c) =>
+          r === i && c === j ? { ...cell, isClicked: !cell.isClicked } : cell,
         ),
       ),
     )
