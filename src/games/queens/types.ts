@@ -1,4 +1,4 @@
-import type { Dispatch, SetStateAction } from 'react'
+import type { StateProps } from '@/types'
 
 import { COLOR_MAP } from './constants'
 
@@ -32,10 +32,8 @@ export type GridCellProps = {
   onClick: () => void
 }
 
-export type GameGridProps = {
-  grid: GridCellStateMatrix
-  setGrid: Dispatch<SetStateAction<GridCellStateMatrix>>
+export type GameGridProps = StateProps<GridCellStateMatrix, 'grid'> & {
   gridSize: number
 }
 
-export type GameOptionsProps = Pick<GameGridProps, 'grid' | 'setGrid'>
+export type GameOptionsProps = StateProps<GridCellStateMatrix, 'grid'>

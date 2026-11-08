@@ -1,7 +1,9 @@
-export const Header = () => {
-  const title = 'Queens'
-  const description = 'My hand made queens player and solver'
+interface HeaderProps {
+  title: string
+  description: string
+}
 
+export const Header = ({ title, description }: HeaderProps) => {
   return (
     <header className="pt-4 text-center">
       <h1 className="text-4xl font-bold">{title}</h1>

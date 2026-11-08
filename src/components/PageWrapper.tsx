@@ -1,43 +1,40 @@
 import { useState } from 'react'
 
-import { GameGrid } from './GameGrid'
-import { GameOptions } from './GameOptions'
-import { GameSelector } from './GameSelector'
-import { Header } from './Header'
+import type { GameOptions } from '@/types'
 
-import { getGame } from '../utils/games'
-import { initializeGameState } from '../utils/gameState'
+import { Queens } from '@/games/queens/components/Queens'
+import { Sudoku } from '@/games/sudoku/components/Sudoku'
+import { GameMenu } from './GameMenu'
+
+const GameMap = {
+  queens: Queens,
+  sudoku: Sudoku,
+}
 
 export const PageWrapper = () => {
-  const [selectedGame, setSelectedGame] = useState(0)
+  const [selectedGame, setSelectedGame] = useState<GameOptions>()
 
-  const current = getGame(selectedGame)
+  const Game = selectedGame ? GameMap[selectedGame] : null
 
-  const [gridSize, setGridSize] = useState(() => current.size)
-
-  const [grid, setGrid] = useState(() => initializeGameState(current.regions))
-
-  const changeGame = (index: number) => {
-    const current = getGame(index)
-
-    console.log(current)
-
-    setSelectedGame(index)
-    setGridSize(current.size)
-    setGrid(initializeGameState(current.regions))
-  }
+  const BackButton = (
+    <button
+      className="m-2 rounded-sm border px-2 hover:ring-1"
+      onClick={() => setSelectedGame(undefined)}
+    >
+      Go Back
+    </button>
+  )
 
   return (
-    <main className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-8 pb-4">
-      <Header />
-      <GameSelector selectedGame={selectedGame} onChange={changeGame} />
-      <GameGrid
-        key={selectedGame}
-        grid={grid}
-        setGrid={setGrid}
-        gridSize={gridSize}
-      />
-      <GameOptions grid={grid} setGrid={setGrid} />
-    </main>
+    <>
+      {selectedGame && BackButton}
+      <main className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-8 pb-4">
+        {Game ? (
+          <Game />
+        ) : (
+          <GameMenu onSelect={(game: GameOptions) => setSelectedGame(game)} />
+        )}
+      </main>
+    </>
   )
 }
