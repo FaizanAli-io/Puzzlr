@@ -9,7 +9,7 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
     <button
       type="button"
       onClick={onClick}
-      style={{ backgroundColor: COLOR_MAP[cell.region] }}
+      style={{ backgroundColor: COLOR_MAP[cell.box] }}
       className={`flex aspect-square items-center justify-center rounded-sm text-xl ${weightClass}`}
     >
       {cell.value || ''}

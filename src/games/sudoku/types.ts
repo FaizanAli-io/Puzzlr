@@ -9,7 +9,8 @@ export type Game = {
 }
 
 export type CellState = {
-  region: number
+  box: number
+  note: number
   value: number
   fixed: boolean
 }

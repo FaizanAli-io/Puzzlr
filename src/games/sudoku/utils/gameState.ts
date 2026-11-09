@@ -15,7 +15,8 @@ export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
       const value = typeof cell === 'number' ? cell : cell.value
 
       return {
-        region: mapper(i, j),
+        box: mapper(i, j),
+        note: 0,
         value: value,
         fixed: value !== 0,
       }

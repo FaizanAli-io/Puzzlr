@@ -1,5 +1,8 @@
 import { COLOR_MAP } from '../constants'
+
 import type { Cell, CellState, Coord } from '../types'
+
+import { checkAndReturnGameSize } from '@/utils/helper'
 
 type RegionMap = Record<Cell, boolean>
 
@@ -16,7 +19,8 @@ export class GameSolver {
     this.recursions = 0
     this.backtracks = 0
 
-    this.gridSize = grid.length
+    this.gridSize = checkAndReturnGameSize(grid)
+
     this.matrix = grid.map((row) => row.map((cell) => cell.region))
   }
 
