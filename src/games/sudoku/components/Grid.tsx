@@ -1,18 +1,26 @@
 import { COLOR_MAP } from '../constants'
 
-import type { GridCellProps, GridProps } from '../types'
+import type { CellState, GridCellProps, GridProps } from '../types'
+
+const getStyleAndValue = (cell: CellState) => {
+  if (cell.fixed) return { style: 'font-bold', value: cell.value }
+  if (cell.value !== 0) return { style: 'font-normal', value: cell.value }
+  if (cell.note !== 0)
+    return { style: 'font-bold text-green-400', value: cell.note }
+  return { style: '', value: '' }
+}
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
-  const weightClass = cell.fixed ? 'font-bold' : ''
+  const { style, value } = getStyleAndValue(cell)
 
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.box] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${weightClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${style}`}
     >
-      {cell.value || ''}
+      {value}
     </button>
   )
 }

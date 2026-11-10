@@ -2,6 +2,8 @@ import type { CellState, GridSize } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
 
+import { GameSolver } from './gameSolver'
+
 export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
   const gridSize = checkAndReturnGameSize(grid) as GridSize
 
@@ -12,13 +14,21 @@ export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
 
   return grid.map((row, i) =>
     row.map((cell, j) => {
-      const value = typeof cell === 'number' ? cell : cell.value
+      let fixed, value
+
+      if (typeof cell === 'number') {
+        fixed = cell !== 0
+        value = cell
+      } else {
+        fixed = cell.fixed
+        value = fixed ? cell.value : 0
+      }
 
       return {
-        box: mapper(i, j),
+        fixed,
+        value,
         note: 0,
-        value: value,
-        fixed: value !== 0,
+        box: mapper(i, j),
       }
     }),
   )
@@ -37,9 +47,18 @@ export function checkGame(grid: CellState[][]) {
 }
 
 export function solveGame(grid: CellState[][]) {
+  const { result, solution, metadata } = new GameSolver(grid).solve()
+
+  const message = `${result ? 'A' : 'No'} solution was found for this game.`
+
   return {
-    isValid: true,
-    message: 'Not implemented yet.',
-    newGrid: grid,
+    isValid: result,
+    message: message,
+    newGrid: structuredClone(grid).map((row, i) =>
+      row.map((cell, j) => ({
+        ...cell,
+        note: cell.fixed ? cell.value : solution[i][j],
+      })),
+    ),
   }
 }

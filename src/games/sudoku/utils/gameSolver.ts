@@ -1,45 +1,174 @@
-import type { CellState } from '../types'
+import type { CellState, GridSize } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
 
-type MoveSet = {
-  rowMoves: number[][]
-  colMoves: number[][]
-  boxMoves: number[][]
+type SolverCell = {
+  value: number
+  possibleMoves: Set<number>
+  position: { i: number; j: number; k: number }
 }
 
 export class GameSolver {
-  gridSize: number
-  matrix: CellState[][]
+  private readonly gridSize: GridSize
+  private readonly matrix: SolverCell[][]
+  private readonly transpositions: {
+    rowT: SolverCell[][]
+    colT: SolverCell[][]
+    boxT: SolverCell[][]
+  }
 
   constructor(grid: CellState[][]) {
-    this.gridSize = checkAndReturnGameSize(grid)
-    this.matrix = structuredClone(grid)
+    const gridSize = checkAndReturnGameSize(grid)
+
+    if (gridSize !== 6 && gridSize !== 9)
+      throw new RangeError('Unsupported grid size')
+
+    this.gridSize = gridSize
+
+    this.matrix = grid.map((row, i) =>
+      row.map(({ box, value, fixed }, j) => ({
+        value: fixed ? value : 0,
+        possibleMoves: new Set(),
+        position: { i, j, k: box },
+      })),
+    )
+
+    this.transpositions = {
+      rowT: Array.from({ length: this.gridSize }, () => []),
+      colT: Array.from({ length: this.gridSize }, () => []),
+      boxT: Array.from({ length: this.gridSize }, () => []),
+    }
+
+    this.matrix.forEach((row) =>
+      row.forEach((cell) => {
+        const { i, j, k } = cell.position
+        this.transpositions.rowT[i].push(cell)
+        this.transpositions.colT[j].push(cell)
+        this.transpositions.boxT[k].push(cell)
+      }),
+    )
   }
 
   solve() {
-    const moves = this.initializeValidMoves()
+    let nakedSingles: boolean
+    let hiddenSingles: boolean
+
+    this.initializePossibleMoves()
+
+    do {
+      nakedSingles = this.findNakedSingles()
+      hiddenSingles = this.findHiddenSingles()
+    } while (nakedSingles || hiddenSingles)
+
+    return this.deconstruct()
   }
 
-  private initializeValidMoves(): MoveSet {
-    const moves = Array.from({ length: this.gridSize }, () =>
-      Array.from({ length: this.gridSize }, (_, j) => j + 1),
-    )
-
+  private deconstruct() {
     return {
-      rowMoves: moves,
-      colMoves: structuredClone(moves),
-      boxMoves: structuredClone(moves),
+      result: !this.matrix.some((row) => row.some((cell) => cell.value === 0)),
+      solution: this.matrix.map((row) => row.map(({ value }) => value)),
+      metadata: {},
     }
   }
 
-  private updateValidMoves(moveSet: MoveSet) {
-    const newMoveSet = structuredClone(moveSet)
+  private findNakedSingles() {
+    let nakedSingles = false
 
-    newMoveSet.rowMoves = moveSet.rowMoves
+    this.matrix.forEach((row) =>
+      row.forEach((cell) => {
+        if (cell.possibleMoves.size === 1) {
+          this.setValue(cell, cell.possibleMoves)
+          nakedSingles = true
+        }
+      }),
+    )
+
+    return nakedSingles
   }
 
-  private getValue(cell: CellState) {
-    return cell.fixed ? cell.value : cell.note
+  private findHiddenSingles() {
+    let hiddenSingles = false
+
+    for (const moveSetType of Object.values(this.transpositions))
+      for (let x = 0; x < this.gridSize; x++)
+        this.getUniqueElements(
+          moveSetType[x].map((cell) => cell.possibleMoves),
+        ).forEach((moveSet, i) => {
+          if (moveSet.size === 1) {
+            this.setValue(moveSetType[x][i], moveSet)
+            hiddenSingles = true
+          }
+        })
+
+    return hiddenSingles
+  }
+
+  private initializePossibleMoves() {
+    const validMoves = Array.from({ length: this.gridSize }, (_, j) => j + 1)
+
+    const createMoveSet = (): Set<number>[] =>
+      Array.from({ length: this.gridSize }, () => new Set(validMoves))
+
+    const [rowMoves, colMoves, boxMoves] = Array.from(
+      { length: 3 },
+      createMoveSet,
+    )
+
+    this.matrix.forEach((row) =>
+      row.forEach((cell) => {
+        const { value, position } = cell
+        const { i, j, k } = position
+
+        if (value !== 0) {
+          rowMoves[i].delete(value)
+          colMoves[j].delete(value)
+          boxMoves[k].delete(value)
+        }
+      }),
+    )
+
+    this.matrix.forEach((row) =>
+      row.forEach((cell) => {
+        const { value, position } = cell
+        const { i, j, k } = position
+
+        if (value === 0)
+          cell.possibleMoves = rowMoves[i]
+            .intersection(colMoves[j])
+            .intersection(boxMoves[k])
+      }),
+    )
+  }
+
+  private getUniqueElements(sets: Set<number>[]): Set<number>[] {
+    return sets.map((set, i) =>
+      set.difference(
+        sets
+          .filter((_, j) => i !== j)
+          .reduce((acc, s) => acc.union(s), new Set<number>()),
+      ),
+    )
+  }
+
+  private setValue(cell: SolverCell, move: Set<number>) {
+    const extractedMove = move.values().next().value!
+
+    if (cell.value !== 0 || !cell.possibleMoves.has(extractedMove))
+      throw new Error('Invalid Move')
+
+    cell.value = extractedMove
+    this.propagate(cell)
+  }
+
+  private propagate(fixedCell: SolverCell) {
+    const { rowT, colT, boxT } = this.transpositions
+    const { value, position } = fixedCell
+    const { i, j, k } = position
+
+    rowT[i].forEach((cell) => cell.possibleMoves.delete(value))
+    colT[j].forEach((cell) => cell.possibleMoves.delete(value))
+    boxT[k].forEach((cell) => cell.possibleMoves.delete(value))
+
+    fixedCell.possibleMoves.clear()
   }
 }

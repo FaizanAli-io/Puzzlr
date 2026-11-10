@@ -91,13 +91,12 @@ export function solveGame(grid: CellState[][]) {
   const { result, solution, metadata } = new GameSolver(grid).solve()
 
   const { duration, recursions, backtracks } = metadata
-  const statistics = `for this game in ${duration} ms with ${recursions} recursions and ${backtracks} backtracks`
+  const statistics = `${duration} ms with ${recursions} recursions and ${backtracks} backtracks`
+  const message = `${result ? 'A' : 'No'} solution was found for this game in ${statistics}.`
 
   return {
     isValid: result,
-    message: result
-      ? `A solution was found ${statistics}`
-      : `No solution possible ${statistics}`,
+    message: message,
     newGrid: highlightCells(grid, solution),
   }
 }
