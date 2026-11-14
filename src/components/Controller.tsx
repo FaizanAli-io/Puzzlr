@@ -2,82 +2,64 @@ import type { GameControllerProps } from '@/types'
 
 import { useState } from 'react'
 
-const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
-  const borderColorClass =
-    valid === undefined
-      ? 'border-neutral-300 dark:border-neutral-700'
-      : valid
-        ? 'border-green-500'
-        : 'border-red-500'
-
-  return (
-    <pre
-      className={`overflow-auto rounded-md border-2 ${borderColorClass} p-2 whitespace-pre-wrap`}
-    >
-      {text}
-    </pre>
-  )
-}
-
 export const Controller = <T,>({
   grid,
   setGrid,
   gameUtils,
 }: GameControllerProps<T>) => {
-  const [valid, setValid] = useState<boolean | undefined>(undefined)
-  const [text, setText] = useState('')
-
-  const handleReset = () => {
-    setGrid((prev) => gameUtils.resetGame(prev))
-    handleClear()
-  }
-
-  const handlePrint = () => setText(gameUtils.printGame(grid))
+  const [result, setResult] = useState<{
+    message: string
+    isValid?: boolean
+  }>()
 
   const handleCheck = () => {
-    const { isValid, message, newGrid } = gameUtils.checkGame(grid)
+    const { newGrid, ...checked } = gameUtils.checkGame(grid)
 
-    setValid(isValid)
-    setText(message)
+    setResult(checked)
     if (newGrid) setGrid(newGrid)
   }
 
   const handleSolve = () => {
-    const { isValid, message, newGrid } = gameUtils.solveGame(grid)
+    const { newGrid, ...solved } = gameUtils.solveGame(grid)
 
-    setValid(isValid)
-    setText(message)
+    setResult(solved)
     setGrid(newGrid)
   }
 
-  const handleClear = () => {
-    setValid(undefined)
-    setText('')
+  const actions = {
+    Reset: () => {
+      setGrid(gameUtils.resetGame(grid))
+      setResult(undefined)
+    },
+    Print: () => setResult({ message: gameUtils.printGame(grid) }),
+    Check: handleCheck,
+    Solve: handleSolve,
   }
+
+  const borderClass =
+    result?.isValid === undefined
+      ? 'border-neutral-300 dark:border-neutral-700'
+      : result.isValid
+        ? 'border-green-500'
+        : 'border-red-500'
 
   return (
     <>
       <div className="flex justify-between">
-        <button className="btn" onClick={handleReset}>
-          Reset
-        </button>
-
-        <button className="btn" onClick={handlePrint}>
-          Print
-        </button>
-
-        <button className="btn" onClick={handleCheck}>
-          Check
-        </button>
-
-        <button className="btn" onClick={handleSolve}>
-          Solve
-        </button>
+        {Object.entries(actions).map(([label, onClick]) => (
+          <button key={label} className="btn" onClick={onClick}>
+            {label}
+          </button>
+        ))}
       </div>
-      {text && (
+      {result && (
         <>
-          <TextBox text={text} valid={valid} />
-          <button className="btn" onClick={handleClear}>
+          <pre
+            className={`overflow-auto rounded-md border-2 ${borderClass} p-2 whitespace-pre-wrap`}
+          >
+            {result.message}
+          </pre>
+          <button className="btn" onClick={() => setResult(undefined)}>
             Clear
           </button>
         </>

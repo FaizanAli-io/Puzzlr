@@ -1,6 +1,6 @@
 import type { GameSelectorProps } from '@/types'
 
-import { GameSelector } from '@/utils/gameSelector'
+import { getGameList } from '@/utils/gameSelector'
 
 export const Selector = ({
   type,
@@ -12,7 +12,7 @@ export const Selector = ({
     className="btn bg-transparent font-bold dark:bg-neutral-950"
     onChange={(e) => onChange(Number(e.target.value))}
   >
-    {GameSelector.getGameList(type).map((game) => (
+    {getGameList(type).map((game) => (
       <option key={game.id} value={game.id}>
         Game {game.id + 1} ({game.size})
       </option>

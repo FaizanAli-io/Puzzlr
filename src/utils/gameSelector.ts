@@ -1,28 +1,19 @@
 import type { Game as QueensGame } from '@/games/queens/types'
 import type { Game as SudokuGame } from '@/games/sudoku/types'
-import type { GameListItem, GameOptions } from '@/types'
+import type { GameOptions } from '@/types'
 
 import queensGames from '../games/queens/games.json'
 import sudokuGames from '../games/sudoku/games.json'
 
-export class GameSelector {
-  private constructor() {}
+const games = {
+  queens: queensGames as QueensGame[],
+  sudoku: sudokuGames as SudokuGame[],
+}
 
-  private static readonly games = {
-    queens: queensGames as QueensGame[],
-    sudoku: sudokuGames as SudokuGame[],
-  }
+export const getGameList = (type: GameOptions) => games[type]
 
-  public static getGameList(type: GameOptions): GameListItem[] {
-    return this.games[type].map(({ id, size }) => ({ id, size }))
-  }
-
-  public static getGame(type: 'queens', index: number): QueensGame
-  public static getGame(type: 'sudoku', index: number): SudokuGame
-  public static getGame(
-    type: GameOptions,
-    index: number,
-  ): QueensGame | SudokuGame {
-    return this.games[type][index]
-  }
+export function getGame(type: 'queens', index: number): QueensGame
+export function getGame(type: 'sudoku', index: number): SudokuGame
+export function getGame(type: GameOptions, index: number) {
+  return games[type][index]
 }

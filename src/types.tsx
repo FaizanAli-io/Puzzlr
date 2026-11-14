@@ -8,11 +8,6 @@ export type StateProps<T, K extends string> = {
 
 export type GameOptions = 'queens' | 'sudoku'
 
-export type GameListItem = {
-  id: number
-  size: number
-}
-
 export type GameSelectorProps = {
   type: GameOptions
   selectedGame: number

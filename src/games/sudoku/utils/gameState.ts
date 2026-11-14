@@ -1,6 +1,6 @@
 import type { CellState, GridSize } from '../types'
 
-import { checkAndReturnGameSize } from '@/utils/helper'
+import { checkAndReturnGameSize, getCheckResult } from '@/utils/helper'
 import { getUnits } from '@/utils/units'
 
 import { GameSolver } from './gameSolver'
@@ -56,42 +56,22 @@ export function checkGame(grid: CellState[][]) {
       ),
     )
 
-  const rowConflicts = findConflicts(rowT)
-  const colConflicts = findConflicts(colT)
-  const boxConflicts = findConflicts(groupT)
-
-  const conflicts = new Set([...rowConflicts, ...colConflicts, ...boxConflicts])
-
   const emptyCells = grid.flat().filter((cell) => cell.value === 0).length
 
-  const newGrid = grid.map((row) =>
-    row.map((cell) => ({ ...cell, highlight: conflicts.has(cell) })),
+  const { conflicts, ...result } = getCheckResult(
+    [
+      [findConflicts(rowT), 'Rows cannot contain repeated numbers'],
+      [findConflicts(colT), 'Columns cannot contain repeated numbers'],
+      [findConflicts(groupT), 'Boxes cannot contain repeated numbers'],
+    ],
+    emptyCells ? `No conflicts so far, ${emptyCells} cells left.` : '',
   )
 
-  if (conflicts.size > 0)
-    return {
-      isValid: false,
-      message: [
-        rowConflicts.length > 0 && 'Rows cannot contain repeated numbers',
-        colConflicts.length > 0 && 'Columns cannot contain repeated numbers',
-        boxConflicts.length > 0 && 'Boxes cannot contain repeated numbers',
-      ]
-        .filter((x) => x !== false)
-        .join('\n'),
-      newGrid,
-    }
-
-  if (emptyCells > 0)
-    return {
-      isValid: undefined,
-      message: `No conflicts so far, ${emptyCells} cells left.`,
-      newGrid,
-    }
-
   return {
-    isValid: true,
-    message: 'Congratulations, you solved the puzzle!',
-    newGrid,
+    ...result,
+    newGrid: grid.map((row) =>
+      row.map((cell) => ({ ...cell, highlight: conflicts.has(cell) })),
+    ),
   }
 }
 

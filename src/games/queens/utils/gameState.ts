@@ -1,6 +1,6 @@
 import type { Cell, CellState, Coord } from '../types'
 
-import { checkAndReturnGameSize } from '@/utils/helper'
+import { checkAndReturnGameSize, getCheckResult } from '@/utils/helper'
 import { getUnits } from '@/utils/units'
 import { GameSolver } from '../utils/gameSolver'
 
@@ -39,75 +39,42 @@ export function checkGame(grid: CellState[][]) {
     regionIndex.get(cell.region)!,
   )
 
-  const getDiagonalNeighbors = (i: number, j: number): Coord[] => {
-    return (
-      [
-        [i + 1, j + 1],
-        [i + 1, j - 1],
-        [i - 1, j + 1],
-        [i - 1, j - 1],
-      ] satisfies Coord[]
-    ).filter(([r, c]) => r >= 0 && c >= 0 && r < gridSize && c < gridSize)
-  }
-
   const findConflicts = (units: CellState[][]) =>
     units.flatMap((unit) => {
       const queens = unit.filter((cell) => cell.isClicked)
       return queens.length > 1 ? queens : []
     })
 
-  const rowConflicts = findConflicts(rowT)
-  const colConflicts = findConflicts(colT)
-  const regionConflicts = findConflicts(groupT)
-
   const diagConflicts = grid.flatMap((row, i) =>
     row.filter(
       (cell, j) =>
         cell.isClicked &&
-        getDiagonalNeighbors(i, j).some(([x, y]) => grid[x][y].isClicked),
+        [-1, 1].some((di) =>
+          [-1, 1].some((dj) => grid[i + di]?.[j + dj]?.isClicked),
+        ),
     ),
   )
-
-  const conflicts = new Set([
-    ...rowConflicts,
-    ...colConflicts,
-    ...regionConflicts,
-    ...diagConflicts,
-  ])
 
   const queensLeft =
     gridSize - grid.flat().filter((cell) => cell.isClicked).length
 
-  const newGrid = grid.map((row) =>
-    row.map((cell) => ({ ...cell, conflict: conflicts.has(cell) })),
+  const { conflicts, ...result } = getCheckResult(
+    [
+      [findConflicts(rowT), 'Rows cannot contain more than one Queen'],
+      [findConflicts(colT), 'Columns cannot contain more than one Queen'],
+      [findConflicts(groupT), 'Regions cannot contain more than one Queen'],
+      [diagConflicts, 'No two Queens can be diagonally adjacent'],
+    ],
+    queensLeft
+      ? `No conflicts so far, ${queensLeft} Queens left to place.`
+      : '',
   )
 
-  if (conflicts.size > 0)
-    return {
-      isValid: false,
-      message: [
-        rowConflicts.length > 0 && 'Rows cannot contain more than one Queen',
-        colConflicts.length > 0 && 'Columns cannot contain more than one Queen',
-        regionConflicts.length > 0 &&
-          'Regions cannot contain more than one Queen',
-        diagConflicts.length > 0 && 'No two Queens can be diagonally adjacent',
-      ]
-        .filter((x) => x !== false)
-        .join('\n'),
-      newGrid,
-    }
-
-  if (queensLeft > 0)
-    return {
-      isValid: undefined,
-      message: `No conflicts so far, ${queensLeft} Queens left to place.`,
-      newGrid,
-    }
-
   return {
-    isValid: true,
-    message: 'Congratulations, you solved the puzzle!',
-    newGrid,
+    ...result,
+    newGrid: grid.map((row) =>
+      row.map((cell) => ({ ...cell, conflict: conflicts.has(cell) })),
+    ),
   }
 }
 

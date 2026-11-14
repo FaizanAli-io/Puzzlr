@@ -40,30 +40,21 @@ export class GameSolver {
   }
 
   solve() {
-    let nakedSingles: boolean
-    let hiddenSingles: boolean
-
     this.steps = 0
 
     const start = performance.now()
 
     this.initializePossibleMoves()
 
-    do {
-      nakedSingles = this.findNakedSingles()
-      hiddenSingles = this.findHiddenSingles()
-    } while (nakedSingles || hiddenSingles)
+    while ([this.findNakedSingles(), this.findHiddenSingles()].some(Boolean));
 
-    const duration = Math.round(performance.now() - start)
-
-    return this.deconstruct(duration)
-  }
-
-  private deconstruct(duration: number) {
     return {
-      result: !this.matrix.some((row) => row.some((cell) => cell.value === 0)),
+      result: this.matrix.every((row) => row.every((cell) => cell.value !== 0)),
       solution: this.matrix.map((row) => row.map(({ value }) => value)),
-      metadata: { duration, steps: this.steps },
+      metadata: {
+        duration: Math.round(performance.now() - start),
+        steps: this.steps,
+      },
     }
   }
 
@@ -72,9 +63,9 @@ export class GameSolver {
 
     this.matrix.forEach((row) =>
       row.forEach((cell) => {
-        if (cell.possibleMoves.size === 0) {
+        if (cell.value === 0 && cell.possibleMoves.size === 0)
           throw Error('Unsolvable Sudoku grid')
-        }
+
         if (cell.possibleMoves.size === 1) {
           this.setValue(cell, cell.possibleMoves)
           nakedSingles = true
@@ -103,40 +94,20 @@ export class GameSolver {
   }
 
   private initializePossibleMoves() {
-    const validMoves = Array.from({ length: this.gridSize }, (_, j) => j + 1)
+    const { rowT, colT, groupT } = this.transpositions
 
-    const createMoveSet = (): Set<number>[] =>
-      Array.from({ length: this.gridSize }, () => new Set(validMoves))
-
-    const [rowMoves, colMoves, boxMoves] = Array.from(
-      { length: 3 },
-      createMoveSet,
+    const validMoves = new Set(
+      Array.from({ length: this.gridSize }, (_, j) => j + 1),
     )
 
-    this.matrix.forEach((row) =>
-      row.forEach((cell) => {
-        const { value, position } = cell
-        const { i, j, k } = position
+    this.matrix.flat().forEach((cell) => {
+      const { i, j, k } = cell.position
 
-        if (value !== 0) {
-          rowMoves[i].delete(value)
-          colMoves[j].delete(value)
-          boxMoves[k].delete(value)
-        }
-      }),
-    )
-
-    this.matrix.forEach((row) =>
-      row.forEach((cell) => {
-        const { value, position } = cell
-        const { i, j, k } = position
-
-        if (value === 0)
-          cell.possibleMoves = rowMoves[i]
-            .intersection(colMoves[j])
-            .intersection(boxMoves[k])
-      }),
-    )
+      if (cell.value === 0)
+        cell.possibleMoves = validMoves.difference(
+          new Set([...rowT[i], ...colT[j], ...groupT[k]].map((c) => c.value)),
+        )
+    })
   }
 
   private getUniqueElements(sets: Set<number>[]): Set<number>[] {
