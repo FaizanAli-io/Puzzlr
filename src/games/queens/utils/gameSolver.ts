@@ -1,10 +1,6 @@
-import { COLOR_MAP } from '../constants'
-
 import type { Cell, CellState, Coord } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
-
-type RegionMap = Record<Cell, boolean>
 
 export class GameSolver {
   private readonly gridSize: number
@@ -27,13 +23,9 @@ export class GameSolver {
       Array.from({ length: this.gridSize }, (_, i) => i),
     )
 
-    const regions = Object.fromEntries(
-      Object.keys(COLOR_MAP).map((key) => [key, true]),
-    ) as RegionMap
-
     const start = performance.now()
 
-    const result = this.solveRecursive(0, moves, regions)
+    const result = this.solveRecursive(0, moves, new Set())
 
     const duration = Math.round(performance.now() - start)
 
@@ -47,22 +39,22 @@ export class GameSolver {
   private solveRecursive(
     rowIndex: number,
     moves: number[][],
-    regions: RegionMap,
+    usedRegions: Set<Cell>,
   ) {
     if (rowIndex >= this.gridSize) return true
 
     this.steps++
 
     for (const move of moves[rowIndex]) {
-      const { newMoves, newRegions, skipBranch } = this.reduceMoves(
+      const { newMoves, newUsedRegions } = this.reduceMoves(
         [rowIndex, move],
         moves,
-        regions,
+        usedRegions,
       )
 
-      if (skipBranch) continue
+      if (this.shouldSkipBranch(newMoves, rowIndex)) continue
 
-      if (this.solveRecursive(rowIndex + 1, newMoves, newRegions)) {
+      if (this.solveRecursive(rowIndex + 1, newMoves, newUsedRegions)) {
         this.solution.push([rowIndex, move])
         return true
       }
@@ -71,20 +63,27 @@ export class GameSolver {
     return false
   }
 
-  private reduceMoves([x, y]: Coord, moves: number[][], regions: RegionMap) {
-    const newRegions = { ...regions }
-    newRegions[this.matrix[x][y]] = false
+  private reduceMoves(
+    [x, y]: Coord,
+    moves: number[][],
+    usedRegions: Set<Cell>,
+  ) {
+    const newUsedRegions = new Set(usedRegions).add(this.matrix[x][y])
 
     const newMoves = moves.map((row, i) =>
       row.filter(
         (j) =>
           i > x &&
           j !== y &&
-          newRegions[this.matrix[i][j]] &&
+          !newUsedRegions.has(this.matrix[i][j]) &&
           (i !== x + 1 || Math.abs(j - y) > 1),
       ),
     )
 
+    return { newMoves, newUsedRegions }
+  }
+
+  private shouldSkipBranch(newMoves: number[][], x: number) {
     const remaining = this.gridSize - x - 1
 
     const reachableCols = new Set(newMoves.flat())
@@ -92,11 +91,10 @@ export class GameSolver {
       newMoves.flatMap((row, i) => row.map((j) => this.matrix[i][j])),
     )
 
-    const skipBranch =
+    return (
       newMoves.some((row, i) => i > x && row.length === 0) ||
       reachableCols.size < remaining ||
       reachableRegions.size < remaining
-
-    return { newMoves, newRegions, skipBranch }
+    )
   }
 }

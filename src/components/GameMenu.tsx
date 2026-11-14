@@ -7,18 +7,22 @@ export const GameMenu = ({
 }: {
   onSelect: (game: GameOptions) => void
 }) => {
-  const buttonClasses = 'btn p-4 text-xl font-bold'
-
   return (
     <>
       <Header
         title="Puzzlr"
         description="Player and solver for various games"
       />
-      <button className={buttonClasses} onClick={() => onSelect('queens')}>
+      <button
+        className="btn p-4 text-xl font-bold"
+        onClick={() => onSelect('queens')}
+      >
         Queens
       </button>
-      <button className={buttonClasses} onClick={() => onSelect('sudoku')}>
+      <button
+        className="btn p-4 text-xl font-bold"
+        onClick={() => onSelect('sudoku')}
+      >
         Sudoku
       </button>
     </>
