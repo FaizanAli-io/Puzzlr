@@ -17,6 +17,8 @@ export class GameSolver {
     boxT: SolverCell[][]
   }
 
+  private steps = 0
+
   constructor(grid: CellState[][]) {
     const gridSize = checkAndReturnGameSize(grid)
 
@@ -53,6 +55,10 @@ export class GameSolver {
     let nakedSingles: boolean
     let hiddenSingles: boolean
 
+    this.steps = 0
+
+    const start = performance.now()
+
     this.initializePossibleMoves()
 
     do {
@@ -60,14 +66,16 @@ export class GameSolver {
       hiddenSingles = this.findHiddenSingles()
     } while (nakedSingles || hiddenSingles)
 
-    return this.deconstruct()
+    const duration = Math.round(performance.now() - start)
+
+    return this.deconstruct(duration)
   }
 
-  private deconstruct() {
+  private deconstruct(duration: number) {
     return {
       result: !this.matrix.some((row) => row.some((cell) => cell.value === 0)),
       solution: this.matrix.map((row) => row.map(({ value }) => value)),
-      metadata: {},
+      metadata: { duration, steps: this.steps },
     }
   }
 
@@ -155,6 +163,8 @@ export class GameSolver {
 
     if (cell.value !== 0 || !cell.possibleMoves.has(extractedMove))
       throw new Error('Invalid Move')
+
+    this.steps++
 
     cell.value = extractedMove
     this.propagate(cell)

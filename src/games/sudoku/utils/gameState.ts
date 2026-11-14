@@ -42,14 +42,16 @@ export function printGame(grid: CellState[][]) {
   )
 }
 
-export function checkGame(grid: CellState[][]) {
+export function checkGame() {
   return { isValid: true, message: 'Not implemented yet.' }
 }
 
 export function solveGame(grid: CellState[][]) {
   const { result, solution, metadata } = new GameSolver(grid).solve()
 
-  const message = `${result ? 'A' : 'No'} solution was found for this game.`
+  const { duration, steps } = metadata
+  const statistics = `${duration} ms and ${steps} steps`
+  const message = `${result ? 'A' : 'No'} solution was found for this game in ${statistics}.`
 
   return {
     isValid: result,

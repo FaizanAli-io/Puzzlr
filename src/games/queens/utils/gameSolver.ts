@@ -7,18 +7,13 @@ import { checkAndReturnGameSize } from '@/utils/helper'
 type RegionMap = Record<Cell, boolean>
 
 export class GameSolver {
-  gridSize: number
-  matrix: Cell[][]
+  private readonly gridSize: number
+  private readonly matrix: Cell[][]
 
-  solution: Coord[]
-  recursions: number
-  backtracks: number
+  private solution: Coord[] = []
+  private steps = 0
 
   constructor(grid: CellState[][]) {
-    this.solution = []
-    this.recursions = 0
-    this.backtracks = 0
-
     this.gridSize = checkAndReturnGameSize(grid)
 
     this.matrix = grid.map((row) => row.map((cell) => cell.region))
@@ -26,8 +21,7 @@ export class GameSolver {
 
   solve() {
     this.solution = []
-    this.recursions = 0
-    this.backtracks = 0
+    this.steps = 0
 
     const moves = Array.from({ length: this.gridSize }, () =>
       Array.from({ length: this.gridSize }, (_, i) => i),
@@ -46,11 +40,7 @@ export class GameSolver {
     return {
       result,
       solution: this.solution,
-      metadata: {
-        duration,
-        recursions: this.recursions,
-        backtracks: this.backtracks,
-      },
+      metadata: { duration, steps: this.steps },
     }
   }
 
@@ -61,7 +51,7 @@ export class GameSolver {
   ) {
     if (rowIndex >= this.gridSize) return true
 
-    this.recursions++
+    this.steps++
 
     for (const move of moves[rowIndex]) {
       const { newMoves, newRegions } = this.reduceMoves(
@@ -75,8 +65,6 @@ export class GameSolver {
         return true
       }
     }
-
-    this.backtracks++
 
     return false
   }

@@ -11,7 +11,7 @@ A personal project exploring problem-solving, recursion, backtracking, and the a
 | Puzzle          | Status      | Features                                                     |
 | --------------- | ----------- | ------------------------------------------------------------ |
 | 👑 Queens       | ✅ Playable | Interactive board, validation, recursive backtracking solver |
-| 🔢 Sudoku       | 🚧 Planned  | Interactive Sudoku game and solver                           |
+| 🔢 Sudoku       | 🚧 WIP      | Interactive board, constraint-propagation solver             |
 | 🧩 More puzzles | 💡 Future   | More logic challenges to come                                |
 
 ### 👑 Queens
@@ -85,7 +85,7 @@ The goals are to:
 - [x] Implement Queens solution validation
 - [x] Build a recursive backtracking solver
 - [x] Support multiple puzzle sizes
-- [ ] Add Sudoku
+- [x] Add Sudoku
 - [ ] Implement a Sudoku solver
 - [ ] Explore additional logic puzzles
 

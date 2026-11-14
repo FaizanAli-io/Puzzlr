@@ -28,9 +28,7 @@ export function checkGame(grid: CellState[][]) {
 
   const clickedToNum = (cell: CellState) => Number(cell.isClicked)
 
-  type Coord = [number, number]
-
-  const getDiagonalNeighbors = (i: number, j: number): [number, number][] => {
+  const getDiagonalNeighbors = (i: number, j: number): Coord[] => {
     return (
       [
         [i + 1, j + 1],
@@ -90,8 +88,8 @@ export function checkGame(grid: CellState[][]) {
 export function solveGame(grid: CellState[][]) {
   const { result, solution, metadata } = new GameSolver(grid).solve()
 
-  const { duration, recursions, backtracks } = metadata
-  const statistics = `${duration} ms with ${recursions} recursions and ${backtracks} backtracks`
+  const { duration, steps } = metadata
+  const statistics = `${duration} ms after ${steps} steps`
   const message = `${result ? 'A' : 'No'} solution was found for this game in ${statistics}.`
 
   return {
