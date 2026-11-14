@@ -1,8 +1,6 @@
-import type { GameOptions } from '@/types'
+import { GAME_OPTIONS, type GameOptions } from '@/types'
 
 import { Header } from '@/components/Header'
-
-const games: GameOptions[] = ['queens', 'sudoku']
 
 export const GameMenu = ({
   onSelect,
@@ -11,7 +9,7 @@ export const GameMenu = ({
 }) => (
   <>
     <Header title="Puzzlr" description="Player and solver for various games" />
-    {games.map((game) => (
+    {GAME_OPTIONS.map((game) => (
       <button
         key={game}
         className="btn p-4 text-xl font-bold capitalize"

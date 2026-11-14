@@ -1,8 +1,13 @@
 import type { CellState, GridSize } from '../types'
 
-import { checkAndReturnGameSize, getCheckResult } from '@/utils/helper'
+import {
+  checkAndReturnGameSize,
+  getCheckResult,
+  parseGrid,
+} from '@/utils/helper'
 import { getUnits } from '@/utils/units'
 
+import schema from '../schema.json'
 import { GameSolver } from './gameSolver'
 
 export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
@@ -28,12 +33,53 @@ export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
       return {
         fixed,
         value,
-        note: 0,
         box: mapper(i, j),
-        highlight: false,
+        conflict: false,
       }
     }),
   )
+}
+
+export const updateCell = (
+  grid: CellState[][],
+  i: number,
+  j: number,
+  getValue: (cell: CellState) => number,
+) =>
+  grid.map((row, r) =>
+    row.map((cell, c) => ({
+      ...cell,
+      conflict: false,
+      value: !cell.fixed && r === i && c === j ? getValue(cell) : cell.value,
+    })),
+  )
+
+export function parseGame(input: unknown) {
+  const rows = parseGrid(
+    input,
+    'grid',
+    schema.properties.grid.oneOf.map(({ minItems }) => minItems),
+  )
+
+  rows.forEach((row, i) =>
+    row.forEach((cell, j) => {
+      if (
+        !Number.isInteger(cell) ||
+        (cell as number) < 0 ||
+        (cell as number) > rows.length
+      )
+        throw new Error(
+          `Row ${i + 1}, column ${j + 1}: expected a whole number from 0 to ${rows.length}, found ${JSON.stringify(cell)}`,
+        )
+    }),
+  )
+
+  const grid = resetGame(rows as number[][])
+  const { isValid, message } = checkGame(grid)
+
+  if (isValid === false) throw new Error(`Given numbers conflict:\n${message}`)
+
+  return grid
 }
 
 export function printGame(grid: CellState[][]) {
@@ -70,7 +116,7 @@ export function checkGame(grid: CellState[][]) {
   return {
     ...result,
     newGrid: grid.map((row) =>
-      row.map((cell) => ({ ...cell, highlight: conflicts.has(cell) })),
+      row.map((cell) => ({ ...cell, conflict: conflicts.has(cell) })),
     ),
   }
 }
@@ -99,12 +145,14 @@ export function solveGame(grid: CellState[][]) {
   return {
     isValid: result,
     message: message,
-    newGrid: structuredClone(grid).map((row, i) =>
-      row.map((cell, j) => ({
-        ...cell,
-        highlight: false,
-        note: cell.fixed ? cell.value : solution[i][j],
-      })),
-    ),
+    newGrid: result
+      ? grid.map((row, i) =>
+          row.map((cell, j) => ({
+            ...cell,
+            conflict: false,
+            value: solution[i][j],
+          })),
+        )
+      : grid,
   }
 }

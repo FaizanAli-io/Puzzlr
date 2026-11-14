@@ -1,0 +1,21 @@
+{
+  "title": "Queens puzzle",
+  "description": "A square board of region letters with exactly as many distinct regions as rows. Extra properties such as id and size are ignored.",
+  "type": "object",
+  "required": ["regions"],
+  "properties": {
+    "regions": {
+      "type": "array",
+      "minItems": 8,
+      "maxItems": 12,
+      "items": {
+        "type": "array",
+        "minItems": 8,
+        "maxItems": 12,
+        "items": {
+          "enum": ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L"]
+        }
+      }
+    }
+  }
+}

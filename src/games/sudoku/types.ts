@@ -10,10 +10,9 @@ export type Game = {
 
 export type CellState = {
   box: number
-  note: number
   value: number
   fixed: boolean
-  highlight: boolean
+  conflict: boolean
 }
 
 export type GridCellProps = {

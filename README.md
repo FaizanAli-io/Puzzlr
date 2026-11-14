@@ -20,7 +20,7 @@ Place exactly one queen in each row, column, and colored region. Queens cannot t
 
 - 5 puzzles, from 8×8 up to 12×12
 - **Check** reports whether the board is solved, still in progress, or in conflict, and outlines the offending queens in red
-- **Solve** runs a recursive backtracking solver and highlights the solution, with a step count and timing
+- **Solve** runs a recursive backtracking solver and places the queens, with a step count and timing
 
 ### 🔢 Sudoku
 
@@ -28,14 +28,44 @@ Fill every row, column, and box with each number exactly once.
 
 - 4 puzzles in 6×6 and 9×9
 - **Check** reports whether the board is solved, still in progress, or in conflict, and outlines the repeated numbers in red
-- **Solve** applies constraint propagation (naked and hidden singles) and shows the solution in green, with a step count and timing
+- **Solve** applies constraint propagation (naked and hidden singles) and fills in the solution, with a step count and timing
 - Boards that need guessing are not solved yet (see the roadmap)
+
+## 📥 Custom Games
+
+Each game page has an **Import custom game** panel: paste JSON or choose a `.json` file, then press Load. The board switches to a **Custom** entry in the game picker. Invalid input shows a specific error and leaves the current board untouched.
+
+The formats are defined by JSON Schemas, [Queens](src/games/queens/schema.json) and [Sudoku](src/games/sudoku/schema.json), which are also what the WebMCP `import_puzzle` tool advertises.
+
+```jsonc
+// Queens: 8×8 to 12×12, one letter A-L per cell, exactly as many regions as rows
+{ "regions": [["A", "A", "B", ...], ...] }
+
+// Sudoku: 6×6 or 9×9, 0 for an empty cell
+{ "grid": [[0, 0, 0, 2, 0, 0], ...] }
+```
+
+Beyond the schema, the importer checks that the board is square, that Queens uses exactly one region per row, and that Sudoku's given numbers don't conflict.
 
 ## 🧠 How the Solvers Work
 
 **Queens** places one queen per row and recurses to the next row. After every placement it removes the used column and region, plus the touching cells in the next row. It abandons a branch as soon as a remaining row, column, or region has no candidate cell left. On the 12×12 board this cut the search from 12,150 steps to under 30.
 
 **Sudoku** keeps a set of candidate numbers for every cell. It repeatedly fills cells that have only one candidate (naked singles) and numbers that fit only one cell in a row, column, or box (hidden singles), propagating each placement to the affected cells.
+
+## 🤖 WebMCP
+
+In browsers that support [WebMCP](https://developer.chrome.com/docs/ai/webmcp/imperative-api), the page registers tools that an in-browser agent can use to play the live board. Tools appear only while the matching UI is on screen.
+
+| Where    | Tools                                                                                                                                                                            |
+| -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| Any page | `open_game`, `back_to_menu`                                                                                                                                                      |
+| Queens   | `queens_select_puzzle`, `queens_import_puzzle`, `queens_check_board`, `queens_solve_board`, `queens_reset_board`, `queens_get_board`, `queens_toggle_queen`, `queens_set_queens` |
+| Sudoku   | `sudoku_select_puzzle`, `sudoku_import_puzzle`, `sudoku_check_board`, `sudoku_solve_board`, `sudoku_reset_board`, `sudoku_get_board`, `sudoku_set_cell`, `sudoku_set_cells`      |
+
+Tool definitions never depend on the board: names are prefixed per game, and anything that varies with the loaded puzzle (size, box shape, valid ranges) is reported in tool results and errors. Tools stay registered while a game is open, so clients don't need to re-fetch them after a move.
+
+WebMCP is an early API (an origin trial in Chrome at the time of writing). Without it the tools are simply not registered, and the app behaves as before.
 
 ## 🛠️ Tech Stack
 
@@ -70,14 +100,18 @@ Open the local URL displayed in your terminal.
 
 ```
 src/
-├── components/   Shared UI: page wrapper, menu, header, controller
+├── components/   Shared UI: page wrapper, game page, menu, controller, import
 ├── games/
-│   ├── queens/   Components, solver, and game state for Queens
-│   └── sudoku/   Components, solver, and game state for Sudoku
-└── utils/        Shared helpers: game selection, state hook, theme, units
+│   ├── queens/   Components, solver, schema, and game state for Queens
+│   └── sudoku/   Components, solver, schema, and game state for Sudoku
+├── utils/        Shared helpers: game data, state hook, theme, units
+├── session.ts    A small store publishing what is on screen
+└── webmcp/       WebMCP tools, built from the published session
 ```
 
-Each game exposes the same `resetGame`, `printGame`, `checkGame`, and `solveGame` functions, so a new puzzle plugs into the shared controller without UI changes.
+Each game exposes the same `resetGame`, `printGame`, `checkGame`, `solveGame`, and `parseGame` functions plus a `Grid` component, so a new puzzle is one folder and one thin page that renders the shared `GamePage`.
+
+The app never imports `webmcp/`. `GamePage` and `PageWrapper` publish their state to `session.ts`, and `webmcp/` subscribes to it and registers the tools, so the whole feature can be deleted by removing the folder and one line in `main.tsx`.
 
 ## 🗺️ Roadmap
 

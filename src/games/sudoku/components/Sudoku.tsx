@@ -1,28 +1,17 @@
-import { Controller } from '@/components/Controller'
-import { Header } from '@/components/Header'
-import { Selector } from '@/components/Selector'
-import { Grid } from './Grid'
+import { GamePage } from '@/components/GamePage'
 
 import { getGame } from '@/utils/gameSelector'
-import { useGameState } from '@/utils/useGameState'
+import schema from '../schema.json'
 import * as gameUtils from '../utils/gameState'
+import { Grid } from './Grid'
 
-const loadGrid = (index: number) =>
-  gameUtils.resetGame(getGame('sudoku', index).grid)
-
-export const Sudoku = () => {
-  const { selectedGame, changeGame, grid, setGrid } = useGameState(loadGrid)
-
-  return (
-    <>
-      <Header title="Sudoku" description="Sudoku player and solver" />
-      <Selector
-        type="sudoku"
-        selectedGame={selectedGame}
-        onChange={changeGame}
-      />
-      <Grid grid={grid} setGrid={setGrid} />
-      <Controller grid={grid} setGrid={setGrid} gameUtils={gameUtils} />
-    </>
-  )
-}
+export const Sudoku = () => (
+  <GamePage
+    type="sudoku"
+    title="Sudoku"
+    schema={schema}
+    Grid={Grid}
+    gameUtils={gameUtils}
+    loadGrid={(index) => gameUtils.resetGame(getGame('sudoku', index).grid)}
+  />
+)

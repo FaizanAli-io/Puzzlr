@@ -1,7 +1,12 @@
 import type { Cell, CellState, Coord } from '../types'
 
-import { checkAndReturnGameSize, getCheckResult } from '@/utils/helper'
+import {
+  checkAndReturnGameSize,
+  getCheckResult,
+  parseGrid,
+} from '@/utils/helper'
 import { getUnits } from '@/utils/units'
+import schema from '../schema.json'
 import { GameSolver } from '../utils/gameSolver'
 
 export function resetGame(grid: Cell[][] | CellState[][]): CellState[][] {
@@ -9,10 +14,56 @@ export function resetGame(grid: Cell[][] | CellState[][]): CellState[][] {
     row.map((cell) => ({
       region: typeof cell === 'string' ? cell : cell.region,
       isClicked: false,
-      highlight: false,
       conflict: false,
     })),
   )
+}
+
+export const toggleQueen = (grid: CellState[][], i: number, j: number) =>
+  grid.map((row, r) =>
+    row.map((cell, c) => ({
+      ...cell,
+      conflict: false,
+      isClicked: r === i && c === j ? !cell.isClicked : cell.isClicked,
+    })),
+  )
+
+export const placeQueens = (grid: CellState[][], queens: Coord[]) =>
+  grid.map((row, r) =>
+    row.map((cell, c) => ({
+      ...cell,
+      conflict: false,
+      isClicked: queens.some(([i, j]) => i === r && j === c),
+    })),
+  )
+
+export function parseGame(input: unknown) {
+  const { minItems, maxItems, items } = schema.properties.regions
+  const letters: string[] = items.items.enum
+
+  const regions = parseGrid(
+    input,
+    'regions',
+    Array.from({ length: maxItems - minItems + 1 }, (_, i) => minItems + i),
+  )
+
+  regions.forEach((row, i) =>
+    row.forEach((cell, j) => {
+      if (typeof cell !== 'string' || !letters.includes(cell))
+        throw new Error(
+          `Row ${i + 1}, column ${j + 1}: expected a region letter (${letters[0]}-${letters.at(-1)}), found ${JSON.stringify(cell)}`,
+        )
+    }),
+  )
+
+  const count = new Set(regions.flat()).size
+
+  if (count !== regions.length)
+    throw new Error(
+      `A ${regions.length}x${regions.length} board needs exactly ${regions.length} regions, found ${count}`,
+    )
+
+  return resetGame(regions as Cell[][])
 }
 
 export function printGame(grid: CellState[][]) {
@@ -88,16 +139,6 @@ export function solveGame(grid: CellState[][]) {
   return {
     isValid: result,
     message: message,
-    newGrid: highlightCells(grid, solution),
+    newGrid: result ? placeQueens(grid, solution) : grid,
   }
-}
-
-function highlightCells(grid: CellState[][], solution: Coord[]) {
-  const newGrid = structuredClone(grid)
-  newGrid.flat().forEach((cell) => (cell.conflict = false))
-  for (const [i, j] of solution) {
-    newGrid[i][j].highlight = true
-  }
-
-  return newGrid
 }

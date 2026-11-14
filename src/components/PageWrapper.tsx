@@ -1,9 +1,10 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 
 import type { GameOptions } from '@/types'
 
 import { Queens } from '@/games/queens/components/Queens'
 import { Sudoku } from '@/games/sudoku/components/Sudoku'
+import { updateSession } from '@/session'
 import { useTheme } from '@/utils/useTheme'
 import { GameMenu } from './GameMenu'
 
@@ -42,6 +43,17 @@ export const PageWrapper = () => {
   const [selectedGame, setSelectedGame] = useState<GameOptions>()
 
   const Game = selectedGame ? GameMap[selectedGame] : null
+
+  useEffect(
+    () =>
+      updateSession({
+        app: {
+          openGame: setSelectedGame,
+          closeGame: () => setSelectedGame(undefined),
+        },
+      }),
+    [],
+  )
 
   return (
     <>

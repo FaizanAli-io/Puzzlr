@@ -1,41 +1,14 @@
-import type { GameControllerProps } from '@/types'
+import type { GameActions, GameResult } from '@/types'
 
-import { useState } from 'react'
-
-export const Controller = <T,>({
-  grid,
-  setGrid,
-  gameUtils,
-}: GameControllerProps<T>) => {
-  const [result, setResult] = useState<{
-    message: string
-    isValid?: boolean
-  }>()
-
-  const handleCheck = () => {
-    const { newGrid, ...checked } = gameUtils.checkGame(grid)
-
-    setResult(checked)
-    if (newGrid) setGrid(newGrid)
-  }
-
-  const handleSolve = () => {
-    const { newGrid, ...solved } = gameUtils.solveGame(grid)
-
-    setResult(solved)
-    setGrid(newGrid)
-  }
-
-  const actions = {
-    Reset: () => {
-      setGrid(gameUtils.resetGame(grid))
-      setResult(undefined)
-    },
-    Print: () => setResult({ message: gameUtils.printGame(grid) }),
-    Check: handleCheck,
-    Solve: handleSolve,
-  }
-
+export const Controller = ({
+  result,
+  actions,
+  onClear,
+}: {
+  result?: GameResult
+  actions: GameActions
+  onClear: () => void
+}) => {
   const borderClass =
     result?.isValid === undefined
       ? 'border-neutral-300 dark:border-neutral-700'
@@ -47,7 +20,7 @@ export const Controller = <T,>({
     <>
       <div className="flex justify-between">
         {Object.entries(actions).map(([label, onClick]) => (
-          <button key={label} className="btn" onClick={onClick}>
+          <button key={label} className="btn capitalize" onClick={onClick}>
             {label}
           </button>
         ))}
@@ -59,7 +32,7 @@ export const Controller = <T,>({
           >
             {result.message}
           </pre>
-          <button className="btn" onClick={() => setResult(undefined)}>
+          <button className="btn" onClick={onClear}>
             Clear
           </button>
         </>

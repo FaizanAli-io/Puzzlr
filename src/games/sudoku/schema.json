@@ -1,0 +1,42 @@
+{
+  "title": "Sudoku puzzle",
+  "description": "A 6x6 or 9x9 grid where 0 is an empty cell and 1 to N are given numbers. Extra properties such as id and size are ignored.",
+  "type": "object",
+  "required": ["grid"],
+  "properties": {
+    "grid": {
+      "oneOf": [
+        {
+          "type": "array",
+          "minItems": 6,
+          "maxItems": 6,
+          "items": {
+            "type": "array",
+            "minItems": 6,
+            "maxItems": 6,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 6
+            }
+          }
+        },
+        {
+          "type": "array",
+          "minItems": 9,
+          "maxItems": 9,
+          "items": {
+            "type": "array",
+            "minItems": 9,
+            "maxItems": 9,
+            "items": {
+              "type": "integer",
+              "minimum": 0,
+              "maximum": 9
+            }
+          }
+        }
+      ]
+    }
+  }
+}

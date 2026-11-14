@@ -15,7 +15,6 @@ export type Game = {
 export type CellState = {
   region: Cell
   isClicked: boolean
-  highlight: boolean
   conflict: boolean
 }
 

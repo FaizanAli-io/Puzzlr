@@ -2,65 +2,46 @@ import { COLOR_MAP } from '../constants'
 
 import type { CellState, GridCellProps, GridProps } from '../types'
 
-const getStyleAndValue = (cell: CellState) => {
-  if (cell.fixed)
-    return { style: 'font-bold text-neutral-900', value: cell.value }
-  if (cell.value !== 0)
-    return { style: 'font-normal text-neutral-900', value: cell.value }
-  if (cell.note !== 0)
-    return { style: 'font-bold text-green-700', value: cell.note }
-  return { style: '', value: '' }
-}
+import { updateCell } from '../utils/gameState'
+
+const getStyleAndValue = ({ fixed, value }: CellState) => ({
+  style: fixed ? 'font-bold text-neutral-900' : 'font-normal text-neutral-900',
+  value: value || '',
+})
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
   const { style, value } = getStyleAndValue(cell)
-  const highlightClass = cell.highlight ? 'ring-4 ring-red-500 ring-inset' : ''
+  const conflictClass = cell.conflict ? 'ring-4 ring-red-500 ring-inset' : ''
 
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.box] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl dark:brightness-90 ${style} ${highlightClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl dark:brightness-90 ${style} ${conflictClass}`}
     >
       {value}
     </button>
   )
 }
 
-export const Grid = ({ grid, setGrid }: GridProps) => {
-  const gridSize = grid.length
-
-  const cellClicked = (i: number, j: number) => {
-    setGrid((prev) =>
-      prev.map((row, r) =>
-        row.map((cell, c) =>
-          !cell.fixed && r === i && c === j
-            ? {
-                ...cell,
-                highlight: false,
-                value: (cell.value + 1) % (gridSize + 1),
-              }
-            : { ...cell, highlight: false },
-        ),
-      ),
-    )
-  }
-
-  return (
-    <div
-      className="grid gap-2"
-      style={{ gridTemplateColumns: `repeat(${gridSize}, minmax(0, 1fr))` }}
-    >
-      {grid.map((row, i) =>
-        row.map((cell, j) => (
-          <GridCell
-            key={`${i}-${j}`}
-            cell={cell}
-            onClick={() => cellClicked(i, j)}
-          />
-        )),
-      )}
-    </div>
-  )
-}
+export const Grid = ({ grid, setGrid }: GridProps) => (
+  <div
+    className="grid gap-2"
+    style={{ gridTemplateColumns: `repeat(${grid.length}, minmax(0, 1fr))` }}
+  >
+    {grid.map((row, i) =>
+      row.map((cell, j) => (
+        <GridCell
+          key={`${i}-${j}`}
+          cell={cell}
+          onClick={() =>
+            setGrid((prev) =>
+              updateCell(prev, i, j, (c) => (c.value + 1) % (prev.length + 1)),
+            )
+          }
+        />
+      )),
+    )}
+  </div>
+)

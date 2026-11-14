@@ -6,7 +6,9 @@ export type StateProps<T, K extends string> = {
   [P in `set${Capitalize<K>}`]: Dispatch<SetStateAction<T>>
 }
 
-export type GameOptions = 'queens' | 'sudoku'
+export const GAME_OPTIONS = ['queens', 'sudoku'] as const
+
+export type GameOptions = (typeof GAME_OPTIONS)[number]
 
 export type GameSelectorProps = {
   type: GameOptions
@@ -14,16 +16,20 @@ export type GameSelectorProps = {
   onChange: (index: number) => void
 }
 
-type GameResult = {
+export type GameResult = {
   isValid: boolean | undefined
   message: string
 }
 
-export type GameControllerProps<T> = StateProps<T, 'grid'> & {
-  gameUtils: {
-    resetGame: (grid: T) => T
-    printGame: (grid: T) => string
-    checkGame: (grid: T) => GameResult & { newGrid?: T }
-    solveGame: (grid: T) => GameResult & { newGrid: T }
-  }
+export type GameUtils<T> = {
+  resetGame: (grid: T) => T
+  printGame: (grid: T) => string
+  parseGame: (input: unknown) => T
+  checkGame: (grid: T) => GameResult & { newGrid?: T }
+  solveGame: (grid: T) => GameResult & { newGrid: T }
 }
+
+export type GameActions = Record<
+  'reset' | 'print' | 'check' | 'solve',
+  () => string
+>
