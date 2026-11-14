@@ -1,29 +1,17 @@
-import { useState } from 'react'
-
 import { Controller } from '@/components/Controller'
 import { Header } from '@/components/Header'
 import { Selector } from '@/components/Selector'
 import { Grid } from './Grid'
 
 import { GameSelector } from '@/utils/gameSelector'
+import { useGameState } from '@/utils/useGameState'
 import * as gameUtils from '../utils/gameState'
 
+const loadGrid = (index: number) =>
+  gameUtils.resetGame(GameSelector.getGame('queens', index).regions)
+
 export const Queens = () => {
-  const [selectedGame, setSelectedGame] = useState(0)
-
-  const current = GameSelector.getGame('queens', selectedGame)
-
-  const [gridSize, setGridSize] = useState(() => current.size)
-
-  const [grid, setGrid] = useState(() => gameUtils.resetGame(current.regions))
-
-  const changeGame = (index: number) => {
-    const current = GameSelector.getGame('queens', index)
-
-    setSelectedGame(index)
-    setGridSize(current.size)
-    setGrid(gameUtils.resetGame(current.regions))
-  }
+  const { selectedGame, changeGame, grid, setGrid } = useGameState(loadGrid)
 
   return (
     <>
@@ -33,12 +21,7 @@ export const Queens = () => {
         selectedGame={selectedGame}
         onChange={changeGame}
       />
-      <Grid
-        key={selectedGame}
-        grid={grid}
-        setGrid={setGrid}
-        gridSize={gridSize}
-      />
+      <Grid grid={grid} setGrid={setGrid} />
       <Controller grid={grid} setGrid={setGrid} gameUtils={gameUtils} />
     </>
   )

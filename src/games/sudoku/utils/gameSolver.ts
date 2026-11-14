@@ -2,6 +2,8 @@ import type { CellState, GridSize } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
 
+import { getUnits } from './units'
+
 type SolverCell = {
   value: number
   possibleMoves: Set<number>
@@ -35,20 +37,7 @@ export class GameSolver {
       })),
     )
 
-    this.transpositions = {
-      rowT: Array.from({ length: this.gridSize }, () => []),
-      colT: Array.from({ length: this.gridSize }, () => []),
-      boxT: Array.from({ length: this.gridSize }, () => []),
-    }
-
-    this.matrix.forEach((row) =>
-      row.forEach((cell) => {
-        const { i, j, k } = cell.position
-        this.transpositions.rowT[i].push(cell)
-        this.transpositions.colT[j].push(cell)
-        this.transpositions.boxT[k].push(cell)
-      }),
-    )
+    this.transpositions = getUnits(this.matrix, (cell) => cell.position.k)
   }
 
   solve() {

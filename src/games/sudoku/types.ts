@@ -13,6 +13,7 @@ export type CellState = {
   note: number
   value: number
   fixed: boolean
+  highlight: boolean
 }
 
 export type GridCellProps = {
@@ -20,6 +21,4 @@ export type GridCellProps = {
   onClick: () => void
 }
 
-export type GridProps = StateProps<CellState[][], 'grid'> & {
-  gridSize: GridSize
-}
+export type GridProps = StateProps<CellState[][], 'grid'>

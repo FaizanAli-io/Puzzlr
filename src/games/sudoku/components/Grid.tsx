@@ -12,27 +12,34 @@ const getStyleAndValue = (cell: CellState) => {
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
   const { style, value } = getStyleAndValue(cell)
+  const highlightClass = cell.highlight ? 'ring-4 ring-red-500 ring-inset' : ''
 
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.box] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${style}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${style} ${highlightClass}`}
     >
       {value}
     </button>
   )
 }
 
-export const Grid = ({ grid, setGrid, gridSize }: GridProps) => {
+export const Grid = ({ grid, setGrid }: GridProps) => {
+  const gridSize = grid.length
+
   const cellClicked = (i: number, j: number) => {
     setGrid((prev) =>
       prev.map((row, r) =>
         row.map((cell, c) =>
           !cell.fixed && r === i && c === j
-            ? { ...cell, value: (cell.value + 1) % (gridSize + 1) }
-            : cell,
+            ? {
+                ...cell,
+                highlight: false,
+                value: (cell.value + 1) % (gridSize + 1),
+              }
+            : { ...cell, highlight: false },
         ),
       ),
     )

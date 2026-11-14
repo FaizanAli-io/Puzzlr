@@ -1,29 +1,17 @@
-import { useState } from 'react'
-
 import { Controller } from '@/components/Controller'
 import { Header } from '@/components/Header'
 import { Selector } from '@/components/Selector'
 import { Grid } from './Grid'
 
 import { GameSelector } from '@/utils/gameSelector'
+import { useGameState } from '@/utils/useGameState'
 import * as gameUtils from '../utils/gameState'
 
+const loadGrid = (index: number) =>
+  gameUtils.resetGame(GameSelector.getGame('sudoku', index).grid)
+
 export const Sudoku = () => {
-  const [selectedGame, setSelectedGame] = useState(0)
-
-  const current = GameSelector.getGame('sudoku', selectedGame)
-
-  const [gridSize, setGridSize] = useState(() => current.size)
-
-  const [grid, setGrid] = useState(() => gameUtils.resetGame(current.grid))
-
-  const changeGame = (index: number) => {
-    const current = GameSelector.getGame('sudoku', index)
-
-    setSelectedGame(index)
-    setGridSize(current.size)
-    setGrid(gameUtils.resetGame(current.grid))
-  }
+  const { selectedGame, changeGame, grid, setGrid } = useGameState(loadGrid)
 
   return (
     <>
@@ -33,12 +21,7 @@ export const Sudoku = () => {
         selectedGame={selectedGame}
         onChange={changeGame}
       />
-      <Grid
-        key={selectedGame}
-        grid={grid}
-        setGrid={setGrid}
-        gridSize={gridSize}
-      />
+      <Grid grid={grid} setGrid={setGrid} />
       <Controller grid={grid} setGrid={setGrid} gameUtils={gameUtils} />
     </>
   )

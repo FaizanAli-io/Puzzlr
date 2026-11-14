@@ -3,6 +3,7 @@ import type { CellState, GridSize } from '../types'
 import { checkAndReturnGameSize } from '@/utils/helper'
 
 import { GameSolver } from './gameSolver'
+import { getUnits } from './units'
 
 export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
   const gridSize = checkAndReturnGameSize(grid) as GridSize
@@ -29,6 +30,7 @@ export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
         value,
         note: 0,
         box: mapper(i, j),
+        highlight: false,
       }
     }),
   )
@@ -42,8 +44,55 @@ export function printGame(grid: CellState[][]) {
   )
 }
 
-export function checkGame() {
-  return { isValid: true, message: 'Not implemented yet.' }
+export function checkGame(grid: CellState[][]) {
+  const { rowT, colT, boxT } = getUnits(grid, (cell) => cell.box)
+
+  const findConflicts = (units: CellState[][]) =>
+    units.flatMap((unit) =>
+      unit.filter(
+        (cell) =>
+          cell.value !== 0 &&
+          unit.some((other) => other !== cell && other.value === cell.value),
+      ),
+    )
+
+  const rowConflicts = findConflicts(rowT)
+  const colConflicts = findConflicts(colT)
+  const boxConflicts = findConflicts(boxT)
+
+  const conflicts = new Set([...rowConflicts, ...colConflicts, ...boxConflicts])
+
+  const emptyCells = grid.flat().filter((cell) => cell.value === 0).length
+
+  const newGrid = grid.map((row) =>
+    row.map((cell) => ({ ...cell, highlight: conflicts.has(cell) })),
+  )
+
+  if (conflicts.size > 0)
+    return {
+      isValid: false,
+      message: [
+        rowConflicts.length > 0 && 'Rows cannot contain repeated numbers',
+        colConflicts.length > 0 && 'Columns cannot contain repeated numbers',
+        boxConflicts.length > 0 && 'Boxes cannot contain repeated numbers',
+      ]
+        .filter((x) => x !== false)
+        .join('\n'),
+      newGrid,
+    }
+
+  if (emptyCells > 0)
+    return {
+      isValid: undefined,
+      message: `No conflicts so far, ${emptyCells} cells left.`,
+      newGrid,
+    }
+
+  return {
+    isValid: true,
+    message: 'Congratulations, you solved the puzzle!',
+    newGrid,
+  }
 }
 
 export function solveGame(grid: CellState[][]) {
@@ -59,6 +108,7 @@ export function solveGame(grid: CellState[][]) {
     newGrid: structuredClone(grid).map((row, i) =>
       row.map((cell, j) => ({
         ...cell,
+        highlight: false,
         note: cell.fixed ? cell.value : solution[i][j],
       })),
     ),

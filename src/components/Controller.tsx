@@ -35,10 +35,11 @@ export const Controller = <T,>({
   const handlePrint = () => setText(gameUtils.printGame(grid))
 
   const handleCheck = () => {
-    const { isValid, message } = gameUtils.checkGame(grid)
+    const { isValid, message, newGrid } = gameUtils.checkGame(grid)
 
     setValid(isValid)
     setText(message)
+    if (newGrid) setGrid(newGrid)
   }
 
   const handleSolve = () => {

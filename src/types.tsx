@@ -20,7 +20,7 @@ export type GameSelectorProps = {
 }
 
 type GameResult = {
-  isValid: boolean
+  isValid: boolean | undefined
   message: string
 }
 
@@ -28,7 +28,7 @@ export type GameControllerProps<T> = StateProps<T, 'grid'> & {
   gameUtils: {
     resetGame: (grid: T) => T
     printGame: (grid: T) => string
-    checkGame: (grid: T) => GameResult
+    checkGame: (grid: T) => GameResult & { newGrid?: T }
     solveGame: (grid: T) => GameResult & { newGrid: T }
   }
 }

@@ -17,7 +17,9 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
   )
 }
 
-export const Grid = ({ grid, setGrid, gridSize }: GridProps) => {
+export const Grid = ({ grid, setGrid }: GridProps) => {
+  const gridSize = grid.length
+
   const cellClicked = (i: number, j: number) => {
     setGrid((prev) =>
       prev.map((row, r) =>
