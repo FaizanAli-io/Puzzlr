@@ -54,11 +54,13 @@ export class GameSolver {
     this.steps++
 
     for (const move of moves[rowIndex]) {
-      const { newMoves, newRegions } = this.reduceMoves(
+      const { newMoves, newRegions, skipBranch } = this.reduceMoves(
         [rowIndex, move],
         moves,
         regions,
       )
+
+      if (skipBranch) continue
 
       if (this.solveRecursive(rowIndex + 1, newMoves, newRegions)) {
         this.solution.push([rowIndex, move])
@@ -83,6 +85,18 @@ export class GameSolver {
       ),
     )
 
-    return { newMoves, newRegions }
+    const remaining = this.gridSize - x - 1
+
+    const reachableCols = new Set(newMoves.flat())
+    const reachableRegions = new Set(
+      newMoves.flatMap((row, i) => row.map((j) => this.matrix[i][j])),
+    )
+
+    const skipBranch =
+      newMoves.some((row, i) => i > x && row.length === 0) ||
+      reachableCols.size < remaining ||
+      reachableRegions.size < remaining
+
+    return { newMoves, newRegions, skipBranch }
   }
 }

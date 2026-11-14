@@ -5,7 +5,7 @@ import { useState } from 'react'
 const TextBox = ({ text, valid }: { text: string; valid?: boolean }) => {
   const borderColorClass =
     valid === undefined
-      ? 'border-black'
+      ? 'border-neutral-300 dark:border-neutral-700'
       : valid
         ? 'border-green-500'
         : 'border-red-500'
@@ -55,31 +55,29 @@ export const Controller = <T,>({
     setText('')
   }
 
-  const buttonClasses = 'border rounded-md p-2'
-
   return (
     <>
       <div className="flex justify-between">
-        <button className={buttonClasses} onClick={handleReset}>
+        <button className="btn" onClick={handleReset}>
           Reset
         </button>
 
-        <button className={buttonClasses} onClick={handlePrint}>
+        <button className="btn" onClick={handlePrint}>
           Print
         </button>
 
-        <button className={buttonClasses} onClick={handleCheck}>
+        <button className="btn" onClick={handleCheck}>
           Check
         </button>
 
-        <button className={buttonClasses} onClick={handleSolve}>
+        <button className="btn" onClick={handleSolve}>
           Solve
         </button>
       </div>
       {text && (
         <>
           <TextBox text={text} valid={valid} />
-          <button className={buttonClasses} onClick={handleClear}>
+          <button className="btn" onClick={handleClear}>
             Clear
           </button>
         </>

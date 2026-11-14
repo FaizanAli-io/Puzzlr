@@ -96,7 +96,21 @@ export function checkGame(grid: CellState[][]) {
 }
 
 export function solveGame(grid: CellState[][]) {
-  const { result, solution, metadata } = new GameSolver(grid).solve()
+  const solver = new GameSolver(grid)
+
+  let solved: ReturnType<typeof solver.solve>
+
+  try {
+    solved = solver.solve()
+  } catch {
+    return {
+      isValid: false,
+      message: 'No solution exists for this game.',
+      newGrid: grid,
+    }
+  }
+
+  const { result, solution, metadata } = solved
 
   const { duration, steps } = metadata
   const statistics = `${duration} ms and ${steps} steps`

@@ -72,6 +72,9 @@ export class GameSolver {
 
     this.matrix.forEach((row) =>
       row.forEach((cell) => {
+        if (cell.possibleMoves.size === 0) {
+          throw Error('Unsolvable Sudoku grid')
+        }
         if (cell.possibleMoves.size === 1) {
           this.setValue(cell, cell.possibleMoves)
           nakedSingles = true

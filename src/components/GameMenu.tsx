@@ -7,7 +7,7 @@ export const GameMenu = ({
 }: {
   onSelect: (game: GameOptions) => void
 }) => {
-  const buttonClasses = 'border-2 rounded-md p-4 hover:ring-2 text-xl font-bold'
+  const buttonClasses = 'btn p-4 text-xl font-bold'
 
   return (
     <>

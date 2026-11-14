@@ -3,10 +3,12 @@ import { COLOR_MAP } from '../constants'
 import type { CellState, GridCellProps, GridProps } from '../types'
 
 const getStyleAndValue = (cell: CellState) => {
-  if (cell.fixed) return { style: 'font-bold', value: cell.value }
-  if (cell.value !== 0) return { style: 'font-normal', value: cell.value }
+  if (cell.fixed)
+    return { style: 'font-bold text-neutral-900', value: cell.value }
+  if (cell.value !== 0)
+    return { style: 'font-normal text-neutral-900', value: cell.value }
   if (cell.note !== 0)
-    return { style: 'font-bold text-green-400', value: cell.note }
+    return { style: 'font-bold text-green-700', value: cell.note }
   return { style: '', value: '' }
 }
 
@@ -19,7 +21,7 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.box] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${style} ${highlightClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl dark:brightness-90 ${style} ${highlightClass}`}
     >
       {value}
     </button>

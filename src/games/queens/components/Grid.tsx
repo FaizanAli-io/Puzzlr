@@ -3,7 +3,9 @@ import { COLOR_MAP } from '../constants'
 import type { GridCellProps, GridProps } from '../types'
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
-  const borderClass = cell.highlight ? 'border-4' : ''
+  const borderClass = cell.highlight
+    ? 'border-4 border-neutral-900 dark:border-white'
+    : ''
   const conflictClass = cell.conflict ? 'ring-4 ring-red-500 ring-inset' : ''
 
   return (
@@ -11,7 +13,7 @@ const GridCell = ({ cell, onClick }: GridCellProps) => {
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.region] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${borderClass} ${conflictClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl text-neutral-900 dark:brightness-90 ${borderClass} ${conflictClass}`}
     >
       {cell.isClicked ? 'X' : ''}
     </button>

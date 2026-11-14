@@ -5,6 +5,7 @@ import type { GameOptions } from '@/types'
 import { Queens } from '@/games/queens/components/Queens'
 import { Sudoku } from '@/games/sudoku/components/Sudoku'
 import { GameMenu } from './GameMenu'
+import { ThemeToggle } from './ThemeToggle'
 
 const GameMap = {
   queens: Queens,
@@ -18,7 +19,7 @@ export const PageWrapper = () => {
 
   const BackButton = (
     <button
-      className="fixed top-4 left-4 rounded-sm border px-2 py-1 hover:ring-1"
+      className="btn fixed top-4 left-4 px-2 py-1"
       onClick={() => setSelectedGame(undefined)}
     >
       Back
@@ -28,7 +29,8 @@ export const PageWrapper = () => {
   return (
     <>
       {selectedGame && BackButton}
-      <main className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-8 pb-4">
+      <ThemeToggle />
+      <main className="mx-auto flex w-full max-w-lg flex-col items-stretch gap-8 px-4 pb-8">
         {Game ? (
           <Game />
         ) : (

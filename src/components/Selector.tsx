@@ -9,7 +9,7 @@ export const Selector = ({
 }: GameSelectorProps) => (
   <select
     value={selectedGame}
-    className="rounded-md border px-4 py-2 font-bold"
+    className="btn bg-transparent font-bold dark:bg-neutral-950"
     onChange={(e) => onChange(Number(e.target.value))}
   >
     {GameSelector.getGameList(type).map((game) => (
