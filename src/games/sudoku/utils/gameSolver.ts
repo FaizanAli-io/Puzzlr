@@ -1,8 +1,7 @@
 import type { CellState, GridSize } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
-
-import { getUnits } from './units'
+import { getUnits } from '@/utils/units'
 
 type SolverCell = {
   value: number
@@ -16,7 +15,7 @@ export class GameSolver {
   private readonly transpositions: {
     rowT: SolverCell[][]
     colT: SolverCell[][]
-    boxT: SolverCell[][]
+    groupT: SolverCell[][]
   }
 
   private steps = 0
@@ -160,13 +159,13 @@ export class GameSolver {
   }
 
   private propagate(fixedCell: SolverCell) {
-    const { rowT, colT, boxT } = this.transpositions
+    const { rowT, colT, groupT } = this.transpositions
     const { value, position } = fixedCell
     const { i, j, k } = position
 
     rowT[i].forEach((cell) => cell.possibleMoves.delete(value))
     colT[j].forEach((cell) => cell.possibleMoves.delete(value))
-    boxT[k].forEach((cell) => cell.possibleMoves.delete(value))
+    groupT[k].forEach((cell) => cell.possibleMoves.delete(value))
 
     fixedCell.possibleMoves.clear()
   }

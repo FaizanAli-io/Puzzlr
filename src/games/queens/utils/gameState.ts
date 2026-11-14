@@ -1,6 +1,7 @@
 import type { Cell, CellState, Coord } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
+import { getUnits } from '@/utils/units'
 import { GameSolver } from '../utils/gameSolver'
 
 export function resetGame(grid: Cell[][] | CellState[][]): CellState[][] {
@@ -9,6 +10,7 @@ export function resetGame(grid: Cell[][] | CellState[][]): CellState[][] {
       region: typeof cell === 'string' ? cell : cell.region,
       isClicked: false,
       highlight: false,
+      conflict: false,
     })),
   )
 }
@@ -26,7 +28,16 @@ export function printGame(grid: CellState[][]) {
 export function checkGame(grid: CellState[][]) {
   const gridSize = checkAndReturnGameSize(grid)
 
-  const clickedToNum = (cell: CellState) => Number(cell.isClicked)
+  const regionIndex = new Map(
+    [...new Set(grid.flat().map((cell) => cell.region))].map((region, i) => [
+      region,
+      i,
+    ]),
+  )
+
+  const { rowT, colT, groupT } = getUnits(grid, (cell) =>
+    regionIndex.get(cell.region)!,
+  )
 
   const getDiagonalNeighbors = (i: number, j: number): Coord[] => {
     return (
@@ -39,50 +50,65 @@ export function checkGame(grid: CellState[][]) {
     ).filter(([r, c]) => r >= 0 && c >= 0 && r < gridSize && c < gridSize)
   }
 
-  const regions: Partial<Record<Cell, number>> = {}
+  const findConflicts = (units: CellState[][]) =>
+    units.flatMap((unit) => {
+      const queens = unit.filter((cell) => cell.isClicked)
+      return queens.length > 1 ? queens : []
+    })
 
-  grid.forEach((row) =>
-    row.forEach((cell) => {
-      regions[cell.region] = (regions[cell.region] ?? 0) + clickedToNum(cell)
-    }),
-  )
+  const rowConflicts = findConflicts(rowT)
+  const colConflicts = findConflicts(colT)
+  const regionConflicts = findConflicts(groupT)
 
-  const regionCheck =
-    Object.keys(regions).length === gridSize &&
-    Object.values(regions).every((count) => count === 1)
-
-  const rowCheck = grid.every(
-    (row) => row.reduce((a, b) => a + clickedToNum(b), 0) === 1,
-  )
-
-  const colCheck = grid[0].every(
-    (_, i) => grid.reduce((a, b) => a + clickedToNum(b[i]), 0) === 1,
-  )
-
-  const diagCheck = grid.every((row, i) =>
-    row.every(
+  const diagConflicts = grid.flatMap((row, i) =>
+    row.filter(
       (cell, j) =>
-        !(
-          cell.isClicked &&
-          getDiagonalNeighbors(i, j).some(([x, y]) => grid[x][y].isClicked)
-        ),
+        cell.isClicked &&
+        getDiagonalNeighbors(i, j).some(([x, y]) => grid[x][y].isClicked),
     ),
   )
 
-  const isValid = regionCheck && rowCheck && colCheck && diagCheck
+  const conflicts = new Set([
+    ...rowConflicts,
+    ...colConflicts,
+    ...regionConflicts,
+    ...diagConflicts,
+  ])
 
-  const message = isValid
-    ? 'Congratulations, you solved the puzzle!'
-    : [
-        !regionCheck && 'All regions must have exactly one Queen',
-        !rowCheck && 'All rows must have exactly one Queen',
-        !colCheck && 'All columns must have exactly one Queen',
-        !diagCheck && 'No Two Queens can be diagonally adjacent',
+  const queensLeft =
+    gridSize - grid.flat().filter((cell) => cell.isClicked).length
+
+  const newGrid = grid.map((row) =>
+    row.map((cell) => ({ ...cell, conflict: conflicts.has(cell) })),
+  )
+
+  if (conflicts.size > 0)
+    return {
+      isValid: false,
+      message: [
+        rowConflicts.length > 0 && 'Rows cannot contain more than one Queen',
+        colConflicts.length > 0 && 'Columns cannot contain more than one Queen',
+        regionConflicts.length > 0 &&
+          'Regions cannot contain more than one Queen',
+        diagConflicts.length > 0 && 'No two Queens can be diagonally adjacent',
       ]
         .filter((x) => x !== false)
-        .join('\n')
+        .join('\n'),
+      newGrid,
+    }
 
-  return { isValid, message }
+  if (queensLeft > 0)
+    return {
+      isValid: undefined,
+      message: `No conflicts so far, ${queensLeft} Queens left to place.`,
+      newGrid,
+    }
+
+  return {
+    isValid: true,
+    message: 'Congratulations, you solved the puzzle!',
+    newGrid,
+  }
 }
 
 export function solveGame(grid: CellState[][]) {
@@ -101,6 +127,7 @@ export function solveGame(grid: CellState[][]) {
 
 function highlightCells(grid: CellState[][], solution: Coord[]) {
   const newGrid = structuredClone(grid)
+  newGrid.flat().forEach((cell) => (cell.conflict = false))
   for (const [i, j] of solution) {
     newGrid[i][j].highlight = true
   }

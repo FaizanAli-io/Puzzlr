@@ -4,13 +4,14 @@ import type { GridCellProps, GridProps } from '../types'
 
 const GridCell = ({ cell, onClick }: GridCellProps) => {
   const borderClass = cell.highlight ? 'border-4' : ''
+  const conflictClass = cell.conflict ? 'ring-4 ring-red-500 ring-inset' : ''
 
   return (
     <button
       type="button"
       onClick={onClick}
       style={{ backgroundColor: COLOR_MAP[cell.region] }}
-      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${borderClass}`}
+      className={`flex aspect-square items-center justify-center rounded-sm text-xl ${borderClass} ${conflictClass}`}
     >
       {cell.isClicked ? 'X' : ''}
     </button>
@@ -24,7 +25,9 @@ export const Grid = ({ grid, setGrid }: GridProps) => {
     setGrid((prev) =>
       prev.map((row, r) =>
         row.map((cell, c) =>
-          r === i && c === j ? { ...cell, isClicked: !cell.isClicked } : cell,
+          r === i && c === j
+            ? { ...cell, isClicked: !cell.isClicked, conflict: false }
+            : { ...cell, conflict: false },
         ),
       ),
     )

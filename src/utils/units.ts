@@ -1,6 +1,6 @@
 import { checkAndReturnGameSize } from '@/utils/helper'
 
-export function getUnits<T>(grid: T[][], boxOf: (cell: T) => number) {
+export function getUnits<T>(grid: T[][], groupOf: (cell: T) => number) {
   const gridSize = checkAndReturnGameSize(grid)
 
   const createUnits = (): T[][] => Array.from({ length: gridSize }, () => [])
@@ -8,14 +8,14 @@ export function getUnits<T>(grid: T[][], boxOf: (cell: T) => number) {
   const units = {
     rowT: createUnits(),
     colT: createUnits(),
-    boxT: createUnits(),
+    groupT: createUnits(),
   }
 
   grid.forEach((row, i) =>
     row.forEach((cell, j) => {
       units.rowT[i].push(cell)
       units.colT[j].push(cell)
-      units.boxT[boxOf(cell)].push(cell)
+      units.groupT[groupOf(cell)].push(cell)
     }),
   )
 

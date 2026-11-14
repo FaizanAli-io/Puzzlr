@@ -16,6 +16,7 @@ export type CellState = {
   region: Cell
   isClicked: boolean
   highlight: boolean
+  conflict: boolean
 }
 
 export type GridCellProps = {

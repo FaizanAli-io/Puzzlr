@@ -1,9 +1,9 @@
 import type { CellState, GridSize } from '../types'
 
 import { checkAndReturnGameSize } from '@/utils/helper'
+import { getUnits } from '@/utils/units'
 
 import { GameSolver } from './gameSolver'
-import { getUnits } from './units'
 
 export function resetGame(grid: number[][] | CellState[][]): CellState[][] {
   const gridSize = checkAndReturnGameSize(grid) as GridSize
@@ -45,7 +45,7 @@ export function printGame(grid: CellState[][]) {
 }
 
 export function checkGame(grid: CellState[][]) {
-  const { rowT, colT, boxT } = getUnits(grid, (cell) => cell.box)
+  const { rowT, colT, groupT } = getUnits(grid, (cell) => cell.box)
 
   const findConflicts = (units: CellState[][]) =>
     units.flatMap((unit) =>
@@ -58,7 +58,7 @@ export function checkGame(grid: CellState[][]) {
 
   const rowConflicts = findConflicts(rowT)
   const colConflicts = findConflicts(colT)
-  const boxConflicts = findConflicts(boxT)
+  const boxConflicts = findConflicts(groupT)
 
   const conflicts = new Set([...rowConflicts, ...colConflicts, ...boxConflicts])
 
