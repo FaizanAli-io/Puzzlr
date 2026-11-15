@@ -4,6 +4,7 @@ import type {
   QueensSession,
   Session,
   SudokuSession,
+  TangoSession,
 } from '@/session'
 import type { GameOptions } from '@/types'
 import type { Tool } from './useWebMCP'
@@ -13,6 +14,7 @@ import { GAME_OPTIONS } from '@/types'
 import { placeQueens, toggleQueen } from '@/games/queens/utils/gameState'
 import sudokuSchema from '@/games/sudoku/schema.json'
 import { updateCell } from '@/games/sudoku/utils/gameState'
+import { updateCell as updateTangoCell } from '@/games/tango/utils/gameState'
 import { getGameList } from '@/utils/gameSelector'
 
 // Tool definitions (name, description, schema) must not depend on game state,
@@ -92,9 +94,10 @@ const commonTools = <T>({
 
         changeGame(number - 1)
 
-        const { size } = games[number - 1]
+        const game = games[number - 1]
+        const size = 'size' in game ? ` (${game.size}x${game.size})` : ''
 
-        return `Loaded puzzle ${number} of ${games.length} (${size}x${size}).`
+        return `Loaded puzzle ${number} of ${games.length}${size}.`
       },
     },
     {
@@ -285,7 +288,88 @@ const sudokuTools = ({ grid, setGrid }: SudokuSession): Tool[] => {
   ]
 }
 
-export const gameTools = (game: AnyGameSession): Tool[] =>
-  game.type === 'queens'
-    ? [...commonTools(game), ...queensTools(game)]
-    : [...commonTools(game), ...sudokuTools(game)]
+const tangoTools = ({ grid, setGrid }: TangoSession): Tool[] => [
+  {
+    name: 'tango_get_board',
+    description:
+      'Get the Tango board: its size, values (0 is empty, 1 is a sun, 2 is a moon), which cells are given, and the constraints between adjacent cells as {cells, type} objects, the same format tango_import_puzzle accepts.',
+    annotations: { readOnlyHint: true },
+    execute: () => ({
+      size: grid.length,
+      values: grid.map((row) => row.map((cell) => cell.value)),
+      given: grid.map((row) => row.map((cell) => cell.fixed)),
+      constraints: grid.flatMap((row, i) =>
+        row.flatMap((cell, j) => [
+          ...(cell.right
+            ? [
+                {
+                  cells: [
+                    [i, j],
+                    [i, j + 1],
+                  ],
+                  type: cell.right,
+                },
+              ]
+            : []),
+          ...(cell.down
+            ? [
+                {
+                  cells: [
+                    [i, j],
+                    [i + 1, j],
+                  ],
+                  type: cell.down,
+                },
+              ]
+            : []),
+        ]),
+      ),
+    }),
+  },
+  {
+    name: 'tango_set_cell',
+    description:
+      'Set a cell to 1 (sun), 2 (moon) or 0 (empty). Rows and columns are 0-indexed.',
+    inputSchema: {
+      ...cellSchema,
+      properties: {
+        ...cellSchema.properties,
+        value: { enum: [0, 1, 2] },
+      },
+      required: [...cellSchema.required, 'value'],
+    },
+    execute: ({
+      row,
+      col,
+      value,
+    }: {
+      row: number
+      col: number
+      value: 0 | 1 | 2
+    }) => {
+      const size = grid.length
+
+      if (!grid[row]?.[col])
+        throw new Error(`(${row}, ${col}) is outside the ${size}x${size} board`)
+      if (grid[row][col].fixed)
+        throw new Error(`(${row}, ${col}) is a given and cannot change`)
+      if (![0, 1, 2].includes(value))
+        throw new Error(`${value} must be 0 (empty), 1 (sun) or 2 (moon)`)
+
+      setGrid((prev) => updateTangoCell(prev, row, col, () => value))
+
+      return `Set row ${row}, col ${col} to ${value}.`
+    },
+  },
+]
+
+export const gameTools = (game: AnyGameSession): Tool[] => {
+  switch (game.type) {
+    case 'queens':
+      return [...commonTools(game), ...queensTools(game)]
+    case 'sudoku':
+      return [...commonTools(game), ...sudokuTools(game)]
+    case 'tango':
+      return [...commonTools(game), ...tangoTools(game)]
+  }
+}

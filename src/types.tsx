@@ -6,7 +6,7 @@ export type StateProps<T, K extends string> = {
   [P in `set${Capitalize<K>}`]: Dispatch<SetStateAction<T>>
 }
 
-export const GAME_OPTIONS = ['queens', 'sudoku'] as const
+export const GAME_OPTIONS = ['queens', 'sudoku', 'tango'] as const
 
 export type GameOptions = (typeof GAME_OPTIONS)[number]
 

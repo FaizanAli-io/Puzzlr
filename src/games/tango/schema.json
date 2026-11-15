@@ -1,0 +1,44 @@
+{
+  "title": "Tango puzzle",
+  "description": "A 6x6 grid where 0 is an empty cell, 1 is a sun and 2 is a moon, plus optional constraints between orthogonally adjacent cells. Extra properties such as id and size are ignored.",
+  "type": "object",
+  "required": ["grid"],
+  "properties": {
+    "grid": {
+      "type": "array",
+      "minItems": 6,
+      "maxItems": 6,
+      "items": {
+        "type": "array",
+        "minItems": 6,
+        "maxItems": 6,
+        "items": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2
+        }
+      }
+    },
+    "constraints": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["cells", "type"],
+        "properties": {
+          "cells": {
+            "type": "array",
+            "minItems": 2,
+            "maxItems": 2,
+            "items": {
+              "type": "array",
+              "minItems": 2,
+              "maxItems": 2,
+              "items": { "type": "integer", "minimum": 0, "maximum": 5 }
+            }
+          },
+          "type": { "enum": ["equal", "opposite"] }
+        }
+      }
+    }
+  }
+}

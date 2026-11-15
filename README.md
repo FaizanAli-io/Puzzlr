@@ -12,6 +12,7 @@ A personal project exploring problem-solving, recursion, backtracking, and the a
 | --------------- | ----------- | ---------------------------------------------------------- |
 | 👑 Queens       | ✅ Playable | Interactive board, live validation, pruned backtracking    |
 | 🔢 Sudoku       | 🚧 WIP      | Interactive board, live validation, constraint propagation |
+| ☀️ Tango        | 🚧 WIP      | Interactive board, live validation, solver not yet written |
 | 🧩 More puzzles | 💡 Future   | More logic challenges to come                              |
 
 ### 👑 Queens
@@ -35,7 +36,7 @@ Fill every row, column, and box with each number exactly once.
 
 Each game page has an **Import custom game** panel: paste JSON or choose a `.json` file, then press Load. The board switches to a **Custom** entry in the game picker. Invalid input shows a specific error and leaves the current board untouched.
 
-The formats are defined by JSON Schemas, [Queens](src/games/queens/schema.json) and [Sudoku](src/games/sudoku/schema.json), which are also what the WebMCP `import_puzzle` tool advertises.
+The formats are defined by JSON Schemas, [Queens](src/games/queens/schema.json), [Sudoku](src/games/sudoku/schema.json) and [Tango](src/games/tango/schema.json), which are also what the WebMCP `import_puzzle` tool advertises.
 
 ```jsonc
 // Queens: 8×8 to 12×12, one letter A-L per cell, exactly as many regions as rows
@@ -43,6 +44,9 @@ The formats are defined by JSON Schemas, [Queens](src/games/queens/schema.json) 
 
 // Sudoku: 6×6 or 9×9, 0 for an empty cell
 { "grid": [[0, 0, 0, 2, 0, 0], ...] }
+
+// Tango: 6×6, 0 empty, 1 sun, 2 moon, plus optional constraints between adjacent cells
+{ "grid": [[0, 1, 0, 0, 2, 0], ...], "constraints": [{ "cells": [[0, 0], [0, 1]], "type": "equal" }] }
 ```
 
 Beyond the schema, the importer checks that the board is square, that Queens uses exactly one region per row, and that Sudoku's given numbers don't conflict.
@@ -61,6 +65,7 @@ In browsers that support [WebMCP](https://developer.chrome.com/docs/ai/webmcp/im
 | -------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | Any page | `open_game`, `back_to_menu`                                                                                                                                                      |
 | Queens   | `queens_select_puzzle`, `queens_import_puzzle`, `queens_check_board`, `queens_solve_board`, `queens_reset_board`, `queens_get_board`, `queens_toggle_queen`, `queens_set_queens` |
+| Tango    | `tango_select_puzzle`, `tango_import_puzzle`, `tango_check_board`, `tango_solve_board`, `tango_reset_board`, `tango_get_board`, `tango_set_cell`                                 |
 | Sudoku   | `sudoku_select_puzzle`, `sudoku_import_puzzle`, `sudoku_check_board`, `sudoku_solve_board`, `sudoku_reset_board`, `sudoku_get_board`, `sudoku_set_cell`, `sudoku_set_cells`      |
 
 Tool definitions never depend on the board: names are prefixed per game, and anything that varies with the loaded puzzle (size, box shape, valid ranges) is reported in tool results and errors. Tools stay registered while a game is open, so clients don't need to re-fetch them after a move.
@@ -103,7 +108,8 @@ src/
 ├── components/   Shared UI: page wrapper, game page, menu, controller, import
 ├── games/
 │   ├── queens/   Components, solver, schema, and game state for Queens
-│   └── sudoku/   Components, solver, schema, and game state for Sudoku
+│   ├── sudoku/   Components, solver, schema, and game state for Sudoku
+│   └── tango/    Components, solver stub, schema, and game state for Tango
 ├── utils/        Shared helpers: game data, state hook, theme, units
 ├── session.ts    A small store publishing what is on screen
 └── webmcp/       WebMCP tools, built from the published session

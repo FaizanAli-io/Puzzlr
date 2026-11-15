@@ -15,7 +15,8 @@ export const Selector = ({
     {selectedGame === -1 && <option value={-1}>Custom</option>}
     {getGameList(type).map((game) => (
       <option key={game.id} value={game.id}>
-        Game {game.id + 1} ({game.size})
+        Game {game.id + 1}
+        {'size' in game && ` (${game.size})`}
       </option>
     ))}
   </select>

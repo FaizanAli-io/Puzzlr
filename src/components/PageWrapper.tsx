@@ -4,6 +4,7 @@ import type { GameOptions } from '@/types'
 
 import { Queens } from '@/games/queens/components/Queens'
 import { Sudoku } from '@/games/sudoku/components/Sudoku'
+import { Tango } from '@/games/tango/components/Tango'
 import { updateSession } from '@/session'
 import { useTheme } from '@/utils/useTheme'
 import { GameMenu } from './GameMenu'
@@ -11,6 +12,7 @@ import { GameMenu } from './GameMenu'
 const GameMap = {
   queens: Queens,
   sudoku: Sudoku,
+  tango: Tango,
 }
 
 const BackButton = ({ onClick }: { onClick: () => void }) => (

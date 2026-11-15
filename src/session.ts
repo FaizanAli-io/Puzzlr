@@ -2,6 +2,7 @@ import type { Dispatch, SetStateAction } from 'react'
 
 import type { CellState as QueensGrid } from '@/games/queens/types'
 import type { CellState as SudokuGrid } from '@/games/sudoku/types'
+import type { CellState as TangoGrid } from '@/games/tango/types'
 import type { GameActions, GameOptions } from '@/types'
 
 // What is currently on screen, published for anything that wants to observe or
@@ -23,7 +24,9 @@ export type QueensSession = GameSession<'queens', QueensGrid[][]>
 
 export type SudokuSession = GameSession<'sudoku', SudokuGrid[][]>
 
-export type AnyGameSession = QueensSession | SudokuSession
+export type TangoSession = GameSession<'tango', TangoGrid[][]>
+
+export type AnyGameSession = QueensSession | SudokuSession | TangoSession
 
 export type Session = {
   app?: { openGame: (game: GameOptions) => void; closeGame: () => void }
